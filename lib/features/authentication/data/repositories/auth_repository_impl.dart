@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:venture_link/core/constants/user_roles.dart';
 import 'package:venture_link/features/authentication/data/datasources/firebase_auth_datasource.dart';
 import 'package:venture_link/features/authentication/domain/entities/user_entity.dart';
 import 'package:venture_link/features/authentication/domain/repositories/auth_repository.dart';
@@ -44,6 +45,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String displayName,
+    required String role,
   }) async {
     final user = await authDatasource.createUserWithEmailAndPassword(
       email: email,
@@ -55,6 +57,7 @@ class AuthRepositoryImpl implements AuthRepository {
       uid: user.uid,
       email: user.email ?? email.trim(),
       fullName: displayName.trim(),
+      role: role,
     );
 
     return await _resolveUser(user) ?? _fallbackEntity(user);
@@ -96,6 +99,7 @@ class AuthRepositoryImpl implements AuthRepository {
         fullName: user.displayName ??
             user.email?.split('@').first ??
             'User',
+        role: UserRoles.student,
       );
       profile = await profileRepository.getProfile(user.uid);
     }

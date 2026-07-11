@@ -52,6 +52,12 @@ abstract final class StartupStrings {
   static const String skillsRequired = 'Add at least one skill';
   static const String deadlineRequired = 'Select an application deadline';
   static const String goToDashboard = 'Go to Dashboard';
+  static const String companyProfile = 'Company Profile';
+  static const String companyProfileSubtitle =
+      'Manage your startup presence on VentureLink';
+  static const String listingsTitle = 'My Listings';
+  static const String listingsSubtitle =
+      'Create and manage your posted opportunities';
   static const String filterByOpportunity = 'Filter by opportunity';
   static const String allOpportunities = 'All opportunities';
   static const String closed = 'Closed';

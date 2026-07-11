@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/home_strings.dart';
-import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
+import 'package:venture_link/core/providers/user_context_providers.dart';
 
 class MainShell extends ConsumerWidget {
   const MainShell({
@@ -23,40 +23,72 @@ class MainShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isStartup = ref.watch(isStartupUserProvider);
-    final applicationsLabel =
-        isStartup ? HomeStrings.navApplicants : HomeStrings.navApplications;
+
+    if (isStartup) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: navigationShell,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: navigationShell.currentIndex,
+          onDestinationSelected: _onTap,
+          backgroundColor: AppColors.surface,
+          indicatorColor: AppColors.accent.withValues(alpha: 0.16),
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.dashboard_outlined),
+              selectedIcon: Icon(Icons.dashboard_rounded),
+              label: HomeStrings.navDashboard,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.work_outline_rounded),
+              selectedIcon: Icon(Icons.work_rounded),
+              label: HomeStrings.navListings,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.groups_outlined),
+              selectedIcon: Icon(Icons.groups_rounded),
+              label: HomeStrings.navApplicants,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.apartment_outlined),
+              selectedIcon: Icon(Icons.apartment_rounded),
+              label: HomeStrings.navCompany,
+            ),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: _onTap,
         backgroundColor: AppColors.surface,
         indicatorColor: AppColors.primary.withValues(alpha: 0.12),
-        destinations: [
-          const NavigationDestination(
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home_rounded),
             label: HomeStrings.navHome,
-            tooltip: HomeStrings.navHome,
           ),
-          const NavigationDestination(
+          NavigationDestination(
             icon: Icon(Icons.explore_outlined),
             selectedIcon: Icon(Icons.explore_rounded),
             label: HomeStrings.navExplore,
-            tooltip: HomeStrings.navExplore,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.description_outlined),
-            selectedIcon: const Icon(Icons.description_rounded),
-            label: applicationsLabel,
-            tooltip: applicationsLabel,
+            icon: Icon(Icons.description_outlined),
+            selectedIcon: Icon(Icons.description_rounded),
+            label: HomeStrings.navApplications,
           ),
-          const NavigationDestination(
+          NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
             selectedIcon: Icon(Icons.person_rounded),
             label: HomeStrings.navProfile,
-            tooltip: HomeStrings.navProfile,
           ),
         ],
       ),

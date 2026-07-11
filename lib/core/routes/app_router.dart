@@ -20,6 +20,9 @@ import 'package:venture_link/features/startup/presentation/screens/create_opport
 import 'package:venture_link/features/startup/presentation/screens/edit_opportunity_screen.dart';
 import 'package:venture_link/features/startup/presentation/screens/startup_applicants_screen.dart';
 import 'package:venture_link/features/startup/presentation/screens/startup_dashboard_screen.dart';
+import 'package:venture_link/features/startup/presentation/screens/startup_listings_screen.dart';
+import 'package:venture_link/features/startup/presentation/screens/startup_profile_screen.dart';
+import 'package:venture_link/shared/widgets/role_branch_screen.dart';
 import 'package:venture_link/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:venture_link/features/admin/presentation/screens/verify_users_screen.dart';
 import 'package:venture_link/features/profile/presentation/screens/edit_profile_screen.dart';
@@ -108,7 +111,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: 'home',
                 pageBuilder: (context, state) => NoTransitionPage(
                   key: state.pageKey,
-                  child: const HomeScreen(),
+                  child: RoleBranchScreen(
+                    student: const HomeScreen(),
+                    startup: const StartupDashboardScreen(),
+                  ),
                 ),
               ),
             ],
@@ -120,7 +126,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: 'search',
                 pageBuilder: (context, state) => NoTransitionPage(
                   key: state.pageKey,
-                  child: const ExploreScreen(),
+                  child: RoleBranchScreen(
+                    student: const ExploreScreen(),
+                    startup: const StartupListingsScreen(),
+                  ),
                 ),
               ),
             ],
@@ -132,7 +141,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: 'applications',
                 pageBuilder: (context, state) => NoTransitionPage(
                   key: state.pageKey,
-                  child: const ApplicationsScreen(),
+                  child: RoleBranchScreen(
+                    student: const ApplicationsScreen(),
+                    startup: const StartupApplicantsScreen(),
+                  ),
                 ),
               ),
             ],
@@ -144,7 +156,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: 'profile',
                 pageBuilder: (context, state) => NoTransitionPage(
                   key: state.pageKey,
-                  child: const ProfileScreen(),
+                  child: RoleBranchScreen(
+                    student: const ProfileScreen(),
+                    startup: const StartupProfileScreen(),
+                  ),
                 ),
               ),
             ],

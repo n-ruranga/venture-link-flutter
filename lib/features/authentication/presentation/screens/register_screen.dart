@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venture_link/core/constants/auth_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
+import 'package:venture_link/core/constants/user_roles.dart';
 import 'package:venture_link/core/utils/validators.dart';
 import 'package:venture_link/core/utils/firebase_auth_exception_mapper.dart';
 import 'package:venture_link/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:venture_link/features/authentication/presentation/widgets/auth_scaffold.dart';
 import 'package:venture_link/features/authentication/presentation/widgets/password_text_field.dart';
+import 'package:venture_link/features/authentication/presentation/widgets/register_role_picker.dart';
 import 'package:venture_link/shared/extensions/context_extensions.dart';
 import 'package:venture_link/shared/widgets/custom_text_field.dart';
 import 'package:venture_link/shared/widgets/primary_button.dart';
@@ -25,6 +27,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  var _selectedRole = UserRoles.student;
+
+  bool get _isStartup => _selectedRole == UserRoles.startup;
 
   @override
   void dispose() {
@@ -46,6 +51,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           displayName: _nameController.text,
           email: _emailController.text,
           password: _passwordController.text,
+          role: _selectedRole,
         );
 
     if (!mounted) {
@@ -71,19 +77,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     return AuthScaffold(
       title: AuthStrings.createAccount,
-      subtitle: AuthStrings.registerSubtitle,
+      subtitle: _isStartup
+          ? AuthStrings.registerStartupSubtitle
+          : AuthStrings.registerStudentSubtitle,
       showBackButton: true,
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            RegisterRolePicker(
+              selectedRole: _selectedRole,
+              onRoleChanged: (role) => setState(() => _selectedRole = role),
+            ),
+            const SizedBox(height: AppSpacing.lg),
             CustomTextField(
               controller: _nameController,
-              label: AuthStrings.fullName,
-              hint: AuthStrings.fullName,
+              label: _isStartup ? AuthStrings.startupName : AuthStrings.fullName,
+              hint: _isStartup ? AuthStrings.startupName : AuthStrings.fullName,
               textInputAction: TextInputAction.next,
-              prefixIcon: Icons.person_outline_rounded,
+              prefixIcon: _isStartup
+                  ? Icons.apartment_outlined
+                  : Icons.person_outline_rounded,
               validator: Validators.validateName,
             ),
             const SizedBox(height: AppSpacing.md),

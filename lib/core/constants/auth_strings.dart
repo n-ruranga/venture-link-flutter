@@ -28,7 +28,19 @@ abstract final class AuthStrings {
 
   static const String createAccount = 'Create Account';
   static const String registerSubtitle = 'Join VentureLink and start your journey';
+  static const String registerStudentSubtitle =
+      'Find internships and grow your career at ALU';
+  static const String registerStartupSubtitle =
+      'Post opportunities and connect with talented students';
+  static const String accountType = 'I am joining as';
+  static const String studentAccount = 'Student';
+  static const String studentAccountDesc =
+      'Browse internships and apply to ALU startups';
+  static const String startupAccount = 'Startup';
+  static const String startupAccountDesc =
+      'Post roles and manage applicants from campus';
   static const String fullName = 'Full Name';
+  static const String startupName = 'Startup Name';
   static const String email = 'Email Address';
   static const String password = 'Password';
   static const String confirmPassword = 'Confirm Password';

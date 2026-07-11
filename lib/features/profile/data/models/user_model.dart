@@ -39,13 +39,14 @@ abstract class UserModel with _$UserModel {
     required String uid,
     required String email,
     required String fullName,
+    String role = UserRoles.student,
   }) {
     final now = DateTime.now();
     return UserModel(
       uid: uid,
       fullName: fullName,
       email: email,
-      role: UserRoles.student,
+      role: role,
       createdAt: now,
       updatedAt: now,
     );

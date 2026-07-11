@@ -5,6 +5,7 @@ abstract class ProfileRepository {
     required String uid,
     required String email,
     required String fullName,
+    required String role,
   });
 
   Future<UserProfileEntity?> getProfile(String uid);

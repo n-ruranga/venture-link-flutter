@@ -18,6 +18,10 @@ abstract final class HomeStrings {
   static const String navApplicants = 'Applicants';
   static const String navProfile = 'Profile';
 
+  static const String navDashboard = 'Dashboard';
+  static const String navListings = 'Listings';
+  static const String navCompany = 'Company';
+
   static const String exploreComingSoon =
       'Explore and filters coming soon';
   static const String applicationsComingSoon =

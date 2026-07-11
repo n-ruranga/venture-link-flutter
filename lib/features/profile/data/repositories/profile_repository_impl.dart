@@ -19,11 +19,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
     required String uid,
     required String email,
     required String fullName,
+    required String role,
   }) async {
     final user = UserModel.initial(
       uid: uid,
       email: email,
       fullName: fullName.trim(),
+      role: role,
     );
     await datasource.createProfile(user);
   }

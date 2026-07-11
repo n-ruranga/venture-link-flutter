@@ -154,6 +154,7 @@ class RegisterActionNotifier extends AsyncNotifier<void> {
     required String displayName,
     required String email,
     required String password,
+    required String role,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
@@ -161,6 +162,7 @@ class RegisterActionNotifier extends AsyncNotifier<void> {
             email: email,
             password: password,
             displayName: displayName,
+            role: role,
           );
     });
   }
