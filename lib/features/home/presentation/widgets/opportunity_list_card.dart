@@ -77,13 +77,9 @@ class OpportunityListCard extends StatelessWidget {
                 ),
                 if (opportunity.skills.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.sm),
-                  Wrap(
-                    spacing: AppSpacing.xs,
-                    runSpacing: AppSpacing.xs,
-                    children: opportunity.skills
-                        .take(3)
-                        .map((skill) => OpportunityTagChip(label: skill))
-                        .toList(),
+                  SkillOverflowChips(
+                    skills: opportunity.skills,
+                    maxVisible: 3,
                   ),
                 ],
               ],

@@ -77,13 +77,16 @@ class StartupDashboardScreen extends ConsumerWidget {
                         builder: (context, constraints) {
                           final crossAxisCount =
                               ResponsiveLayout.gridCrossAxisCount(context);
-                          return GridView.count(
+                          return GridView(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            crossAxisCount: crossAxisCount,
-                            crossAxisSpacing: AppSpacing.md,
-                            mainAxisSpacing: AppSpacing.md,
-                            childAspectRatio: crossAxisCount > 2 ? 1.8 : 1.6,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxisCount,
+                              crossAxisSpacing: AppSpacing.md,
+                              mainAxisSpacing: AppSpacing.md,
+                              mainAxisExtent: crossAxisCount > 2 ? 112 : 132,
+                            ),
                             children: [
                             DashboardStatCard(
                               label: StartupStrings.activeOpportunities,

@@ -70,4 +70,9 @@ abstract final class AuthStrings {
   static const String loginSuccess = 'Welcome back!';
   static const String registerSuccess = 'Account created successfully!';
   static const String logoutSuccess = 'Signed out successfully';
+
+  static const String firestorePermissionDenied =
+      'Cannot access the database. Deploy Firestore security rules from this project, then try again.';
+  static const String accountCreatedProfileFailed =
+      'Your account was created but profile setup failed. Deploy Firestore rules, then sign in to finish setup.';
 }

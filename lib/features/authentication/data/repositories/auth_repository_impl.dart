@@ -87,7 +87,19 @@ class AuthRepositoryImpl implements AuthRepository {
       return null;
     }
 
-    final profile = await profileRepository.getProfile(user.uid);
+    var profile = await profileRepository.getProfile(user.uid);
+
+    if (profile == null) {
+      await profileRepository.createInitialProfile(
+        uid: user.uid,
+        email: user.email ?? '',
+        fullName: user.displayName ??
+            user.email?.split('@').first ??
+            'User',
+      );
+      profile = await profileRepository.getProfile(user.uid);
+    }
+
     if (profile == null) {
       return _fallbackEntity(user);
     }

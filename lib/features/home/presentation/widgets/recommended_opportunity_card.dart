@@ -55,7 +55,7 @@ class RecommendedOpportunityCard extends StatelessWidget {
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -63,7 +63,7 @@ class RecommendedOpportunityCard extends StatelessWidget {
                     children: [
                       StartupLogoAvatar(
                         opportunity: opportunity,
-                        size: 44,
+                        size: 40,
                         heroTag: 'logo-${opportunity.id}',
                       ),
                       const Spacer(),
@@ -85,12 +85,12 @@ class RecommendedOpportunityCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Colors.white,
-                              height: 1.2,
+                              height: 1.15,
                             ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: AppSpacing.xs),
                   Row(
                     children: [
                       const Icon(
@@ -102,32 +102,26 @@ class RecommendedOpportunityCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           opportunity.startupName,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.9),
-                              ),
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                  ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: [
-                      ...opportunity.skills.take(3).map(
-                            (skill) => OpportunityTagChip(
-                              label: skill,
-                              onLightBackground: false,
-                            ),
-                          ),
-                      WorkModeBadge(
-                        label: opportunity.workMode.label,
-                        compact: true,
-                      ),
-                    ],
+                  const SizedBox(height: AppSpacing.sm),
+                  SkillOverflowChips(
+                    skills: opportunity.skills,
+                    maxVisible: 3,
+                    onLightBackground: false,
+                    trailing: _LightWorkModeBadge(
+                      label: opportunity.workMode.label,
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
                   Row(
                     children: [
                       _MetaChip(
@@ -146,6 +140,30 @@ class RecommendedOpportunityCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _LightWorkModeBadge extends StatelessWidget {
+  const _LightWorkModeBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
       ),
     );
   }

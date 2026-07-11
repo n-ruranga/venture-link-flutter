@@ -91,10 +91,71 @@ class OpportunityTagChip extends StatelessWidget {
       ),
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: onLightBackground ? AppColors.primary : Colors.white,
               fontWeight: FontWeight.w600,
             ),
+      ),
+    );
+  }
+}
+
+/// Shows up to [maxVisible] skills, then a compact "+N more" chip.
+/// Uses a single horizontal row so cards never grow from wrapping tags.
+class SkillOverflowChips extends StatelessWidget {
+  const SkillOverflowChips({
+    super.key,
+    required this.skills,
+    this.maxVisible = 3,
+    this.onLightBackground = true,
+    this.trailing,
+  });
+
+  final List<String> skills;
+  final int maxVisible;
+  final bool onLightBackground;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    if (skills.isEmpty && trailing == null) {
+      return const SizedBox.shrink();
+    }
+
+    final visible = skills.take(maxVisible).toList();
+    final remaining = skills.length - visible.length;
+
+    return SizedBox(
+      height: 28,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        children: [
+          for (var i = 0; i < visible.length; i++) ...[
+            if (i > 0) const SizedBox(width: AppSpacing.xs),
+            Center(
+              child: OpportunityTagChip(
+                label: visible[i],
+                onLightBackground: onLightBackground,
+              ),
+            ),
+          ],
+          if (remaining > 0) ...[
+            const SizedBox(width: AppSpacing.xs),
+            Center(
+              child: OpportunityTagChip(
+                label: '+$remaining more',
+                onLightBackground: onLightBackground,
+              ),
+            ),
+          ],
+          if (trailing != null) ...[
+            const SizedBox(width: AppSpacing.xs),
+            Center(child: trailing!),
+          ],
+        ],
       ),
     );
   }

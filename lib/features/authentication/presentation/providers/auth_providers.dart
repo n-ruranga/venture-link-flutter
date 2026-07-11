@@ -111,6 +111,11 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<void> signOut() async {
     await ref.read(authRepositoryProvider).signOut();
   }
+
+  Future<void> refreshUser() async {
+    final user = await ref.read(authRepositoryProvider).getCurrentUser();
+    state = AsyncData(_mapUserToState(user));
+  }
 }
 
 class LoginActionNotifier extends AsyncNotifier<void> {
@@ -194,6 +199,10 @@ class EmailVerificationActionNotifier extends AsyncNotifier<void> {
 
     if (state.hasError) {
       return false;
+    }
+
+    if (user.isEmailVerified) {
+      await ref.read(authNotifierProvider.notifier).refreshUser();
     }
 
     return user.isEmailVerified;

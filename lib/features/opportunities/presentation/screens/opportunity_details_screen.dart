@@ -72,7 +72,7 @@ class OpportunityDetailsScreen extends ConsumerWidget {
                 child: CustomScrollView(
                   slivers: [
                     SliverAppBar(
-                      expandedHeight: 220,
+                      expandedHeight: 228,
                       pinned: true,
                       stretch: true,
                       backgroundColor: Color(opportunity.startupColor),
@@ -103,71 +103,114 @@ class OpportunityDetailsScreen extends ConsumerWidget {
                               end: Alignment.bottomRight,
                             ),
                           ),
-                          padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.lg,
-                            96,
-                            AppSpacing.lg,
-                            AppSpacing.lg,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              StartupLogoAvatar(
-                                opportunity: opportunity,
-                                size: 64,
-                                heroTag: 'logo-$opportunityId',
+                          child: SafeArea(
+                            bottom: false,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                AppSpacing.lg,
+                                kToolbarHeight,
+                                AppSpacing.lg,
+                                AppSpacing.lg,
                               ),
-                              const Spacer(),
-                              Hero(
-                                tag: 'title-$opportunityId',
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: Text(
-                                    opportunity.title,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.xs),
-                              Row(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Text(
-                                      opportunity.startupName,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge
-                                          ?.copyWith(
-                                            color: Colors.white
-                                                .withValues(alpha: 0.9),
-                                          ),
-                                    ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      StartupLogoAvatar(
+                                        opportunity: opportunity,
+                                        size: 52,
+                                        heroTag: 'logo-$opportunityId',
+                                      ),
+                                      const SizedBox(width: AppSpacing.md),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Hero(
+                                              tag: 'title-$opportunityId',
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: Text(
+                                                  opportunity.title,
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleLarge
+                                                      ?.copyWith(
+                                                        color: Colors.white,
+                                                        height: 1.15,
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: AppSpacing.xs),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    opportunity.startupName,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium
+                                                        ?.copyWith(
+                                                          color: Colors.white
+                                                              .withValues(
+                                                            alpha: 0.9,
+                                                          ),
+                                                        ),
+                                                  ),
+                                                ),
+                                                if (opportunity.isVerified) ...[
+                                                  const SizedBox(
+                                                    width: AppSpacing.sm,
+                                                  ),
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 4,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white
+                                                          .withValues(
+                                                        alpha: 0.2,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                        20,
+                                                      ),
+                                                    ),
+                                                    child: Text(
+                                                      OpportunityStrings.verified,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .labelSmall
+                                                          ?.copyWith(
+                                                            color: Colors.white,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  if (opportunity.isVerified)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            Colors.white.withValues(alpha: 0.2),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        OpportunityStrings.verified,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelSmall
-                                            ?.copyWith(color: Colors.white),
-                                      ),
-                                    ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ),

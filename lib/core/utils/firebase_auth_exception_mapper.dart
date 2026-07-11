@@ -34,6 +34,9 @@ abstract final class FirebaseAuthExceptionMapper {
     if (error is FirebaseAuthException) {
       return map(error);
     }
+    if (error is FirebaseException && error.code == 'permission-denied') {
+      return AuthStrings.firestorePermissionDenied;
+    }
     return AppStrings.genericError;
   }
 }
