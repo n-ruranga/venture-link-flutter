@@ -1,139 +1,229 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:venture_link/core/constants/auth_strings.dart';
 import 'package:venture_link/core/constants/colors.dart';
-import 'package:venture_link/core/constants/profile_strings.dart';
+import 'package:venture_link/core/constants/home_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
-import 'package:venture_link/core/constants/strings.dart';
 import 'package:venture_link/core/routes/route_names.dart';
 import 'package:venture_link/features/authentication/presentation/providers/auth_providers.dart';
+import 'package:venture_link/features/home/presentation/widgets/category_grid.dart';
+import 'package:venture_link/features/home/presentation/widgets/home_header_widgets.dart';
+import 'package:venture_link/features/home/presentation/widgets/opportunity_list_card.dart';
+import 'package:venture_link/features/home/presentation/widgets/recommended_opportunity_card.dart';
+import 'package:venture_link/features/opportunities/presentation/providers/opportunity_providers.dart';
+import 'package:venture_link/features/opportunities/presentation/widgets/opportunity_shared_widgets.dart';
 import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
-import 'package:venture_link/shared/extensions/context_extensions.dart';
+import 'package:venture_link/shared/widgets/empty_state_widget.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
-import 'package:venture_link/shared/widgets/primary_button.dart';
-import 'package:venture_link/shared/widgets/secondary_button.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
-  Future<void> _handleLogout(WidgetRef ref, BuildContext context) async {
-    await ref.read(authNotifierProvider.notifier).signOut();
-    if (context.mounted) {
-      context.showSnackBar(AuthStrings.logoutSuccess);
-    }
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authAsync = ref.watch(authNotifierProvider);
     final profileAsync = ref.watch(userProfileStreamProvider);
+    final featured = ref.watch(featuredOpportunitiesProvider);
+    final recent = ref.watch(categoryFilteredOpportunitiesProvider);
+    final categories = ref.watch(opportunityCategoriesProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider);
+    final bookmarkedIds = ref.watch(bookmarkedIdsProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.appName),
-        actions: [
-          IconButton(
-            onPressed: () => context.push(RouteNames.profile),
-            icon: const Icon(Icons.person_outline_rounded),
-            tooltip: ProfileStrings.profile,
-          ),
-          IconButton(
-            onPressed: authAsync.isLoading
-                ? null
-                : () => _handleLogout(ref, context),
-            icon: const Icon(Icons.logout_rounded),
-            tooltip: AuthStrings.logout,
-          ),
-        ],
-      ),
-      body: authAsync.when(
-        loading: () => const LoadingIndicator(),
-        error: (error, _) => Center(child: Text(error.toString())),
-        data: (authState) {
-          if (!authState.isAuthenticated) {
-            return const LoadingIndicator();
-          }
+    return authAsync.when(
+      loading: () => const Scaffold(body: LoadingIndicator()),
+      error: (error, _) => Scaffold(body: Center(child: Text(error.toString()))),
+      data: (authState) {
+        if (!authState.isAuthenticated) {
+          return const Scaffold(body: LoadingIndicator());
+        }
 
-          final user = authState.user!;
-          final profile = profileAsync.value;
-          final displayName =
-              profile?.fullName ?? user.displayName ?? user.email.split('@').first;
+        final user = authState.user!;
+        final profile = profileAsync.value;
+        final firstName = _firstName(
+          profile?.fullName ?? user.displayName ?? user.email,
+        );
 
-          return Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primary, AppColors.secondary],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: SafeArea(
+            child: CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                    AppSpacing.sm,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Welcome, $displayName!',
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: Colors.white,
-                                ),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      HomeGreetingHeader(
+                        name: firstName,
+                        onAvatarTap: () => context.go(RouteNames.profile),
                       ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        user.email,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.85),
-                            ),
+                      const SizedBox(height: AppSpacing.lg),
+                      HomeSearchSection(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          ref.read(homeSearchQueryProvider.notifier).state =
+                              value;
+                        },
                       ),
-                      if (profile != null) ...[
+                    ]),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: AppSpacing.lg),
+                        SectionHeader(
+                          title: HomeStrings.recommended,
+                          actionLabel: HomeStrings.seeAll,
+                          onAction: () => context.go(RouteNames.search),
+                        ),
                         const SizedBox(height: AppSpacing.md),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 240,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                      ),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: featured.length,
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(width: AppSpacing.md),
+                      itemBuilder: (context, index) {
+                        final opportunity = featured[index];
+                        return RecommendedOpportunityCard(
+                          opportunity: opportunity,
+                          isBookmarked:
+                              bookmarkedIds.contains(opportunity.id),
+                          onBookmarkToggle: () => ref
+                              .read(bookmarkedIdsProvider.notifier)
+                              .toggle(opportunity.id),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.xl,
+                    AppSpacing.lg,
+                    AppSpacing.sm,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          '${ProfileStrings.profileCompletion}: ${profile.completionPercentage}%',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.9),
-                              ),
+                          HomeStrings.browseCategories,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        CategoryGrid(
+                          categories: categories,
+                          selectedCategory: selectedCategory,
+                          onCategorySelected: (category) {
+                            ref.read(selectedCategoryProvider.notifier).state =
+                                category;
+                          },
                         ),
                       ],
-                    ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  'You are signed in',
-                  style: Theme.of(context).textTheme.titleMedium,
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    AppSpacing.sm,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      HomeStrings.recentOpportunities,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Opportunity features coming in the next phase.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                ),
-                const Spacer(),
-                PrimaryButton(
-                  label: ProfileStrings.profile,
-                  icon: Icons.person_outline_rounded,
-                  onPressed: () => context.push(RouteNames.profile),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                SecondaryButton(
-                  label: AuthStrings.logout,
-                  icon: Icons.logout_rounded,
-                  onPressed: () => _handleLogout(ref, context),
-                ),
+                if (recent.isEmpty)
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyStateWidget(
+                      title: HomeStrings.noResults,
+                      icon: Icons.search_off_rounded,
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.md,
+                      AppSpacing.lg,
+                      AppSpacing.xxl,
+                    ),
+                    sliver: SliverList.separated(
+                      itemCount: recent.length,
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(height: AppSpacing.md),
+                      itemBuilder: (context, index) {
+                        final opportunity = recent[index];
+                        return OpportunityListCard(
+                          opportunity: opportunity,
+                          isBookmarked:
+                              bookmarkedIds.contains(opportunity.id),
+                          onBookmarkToggle: () => ref
+                              .read(bookmarkedIdsProvider.notifier)
+                              .toggle(opportunity.id),
+                        );
+                      },
+                    ),
+                  ),
               ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
+  }
+
+  String _firstName(String fullName) {
+    final parts = fullName.trim().split(' ');
+    if (parts.isEmpty || parts.first.isEmpty) {
+      return 'Student';
+    }
+    if (parts.first.contains('@')) {
+      return parts.first.split('@').first;
+    }
+    return parts.first;
   }
 }

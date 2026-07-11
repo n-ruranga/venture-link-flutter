@@ -11,7 +11,10 @@ import 'package:venture_link/features/authentication/presentation/screens/login_
 import 'package:venture_link/features/authentication/presentation/screens/onboarding_screen.dart';
 import 'package:venture_link/features/authentication/presentation/screens/register_screen.dart';
 import 'package:venture_link/features/authentication/presentation/screens/splash_screen.dart';
+import 'package:venture_link/features/home/presentation/screens/explore_screen.dart';
 import 'package:venture_link/features/home/presentation/screens/home_screen.dart';
+import 'package:venture_link/features/home/presentation/screens/main_shell.dart';
+import 'package:venture_link/features/opportunities/presentation/screens/opportunity_details_screen.dart';
 import 'package:venture_link/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:venture_link/features/profile/presentation/screens/profile_screen.dart';
 
@@ -84,25 +87,77 @@ final routerProvider = Provider<GoRouter>((ref) {
           child: const EmailVerificationScreen(),
         ),
       ),
-      GoRoute(
-        path: RouteNames.home,
-        name: 'home',
-        pageBuilder: (context, state) => fadeTransitionPage(
-          key: state.pageKey,
-          child: const HomeScreen(),
-        ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainShell(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RouteNames.home,
+                name: 'home',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const HomeScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RouteNames.search,
+                name: 'search',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const ExploreScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RouteNames.applications,
+                name: 'applications',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const ApplicationsScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RouteNames.profile,
+                name: 'profile',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const ProfileScreen(),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
-        path: RouteNames.profile,
-        name: 'profile',
-        pageBuilder: (context, state) => slideTransitionPage(
-          key: state.pageKey,
-          child: const ProfileScreen(),
-        ),
+        path: RouteNames.opportunityDetails,
+        name: 'opportunityDetails',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return slideTransitionPage(
+            key: state.pageKey,
+            child: OpportunityDetailsScreen(opportunityId: id),
+          );
+        },
       ),
       GoRoute(
         path: RouteNames.editProfile,
         name: 'editProfile',
+        parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) => slideTransitionPage(
           key: state.pageKey,
           child: const EditProfileScreen(),
@@ -132,6 +187,13 @@ String? _redirect(Ref ref, GoRouterState state) {
     RouteNames.forgotPassword,
   };
 
+  const shellRoutes = {
+    RouteNames.home,
+    RouteNames.search,
+    RouteNames.applications,
+    RouteNames.profile,
+  };
+
   if (authState.isAuthenticated) {
     if (publicRoutes.contains(location) ||
         location == RouteNames.emailVerification) {
@@ -153,7 +215,10 @@ String? _redirect(Ref ref, GoRouterState state) {
 
   if (hasCompletedOnboarding &&
       !publicRoutes.contains(location) &&
-      location != RouteNames.emailVerification) {
+      location != RouteNames.emailVerification &&
+      !shellRoutes.contains(location) &&
+      !location.startsWith('/opportunities/') &&
+      location != RouteNames.editProfile) {
     return RouteNames.login;
   }
 
