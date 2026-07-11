@@ -67,7 +67,7 @@ class OpportunityListCard extends StatelessWidget {
                     WorkModeBadge(label: opportunity.workMode.label, compact: true),
                     _InfoPill(
                       icon: Icons.schedule_rounded,
-                      label: opportunity.weeklyHours,
+                      label: opportunity.hoursLabel,
                     ),
                     _InfoPill(
                       icon: Icons.place_outlined,
@@ -75,14 +75,14 @@ class OpportunityListCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (opportunity.tags.isNotEmpty) ...[
+                if (opportunity.skills.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.sm),
                   Wrap(
                     spacing: AppSpacing.xs,
                     runSpacing: AppSpacing.xs,
-                    children: opportunity.tags
+                    children: opportunity.skills
                         .take(3)
-                        .map((tag) => OpportunityTagChip(label: tag))
+                        .map((skill) => OpportunityTagChip(label: skill))
                         .toList(),
                   ),
                 ],

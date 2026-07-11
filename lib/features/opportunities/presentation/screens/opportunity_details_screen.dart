@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/dimensions.dart';
 import 'package:venture_link/core/constants/home_strings.dart';
+import 'package:venture_link/core/constants/opportunity_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
 import 'package:venture_link/features/opportunities/domain/entities/opportunity_entity.dart';
 import 'package:venture_link/features/opportunities/presentation/providers/opportunity_providers.dart';
 import 'package:venture_link/features/opportunities/presentation/widgets/opportunity_shared_widgets.dart';
-import 'package:venture_link/shared/widgets/empty_state_widget.dart';
+import 'package:venture_link/features/opportunities/presentation/widgets/opportunity_state_widgets.dart';
+import 'package:venture_link/shared/extensions/context_extensions.dart';
+import 'package:venture_link/shared/widgets/error_state_widget.dart';
+import 'package:venture_link/shared/widgets/loading_indicator.dart';
 import 'package:venture_link/shared/widgets/primary_button.dart';
 
 class OpportunityDetailsScreen extends ConsumerWidget {
@@ -21,157 +26,244 @@ class OpportunityDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final opportunity = ref.watch(opportunityByIdProvider(opportunityId));
-    final isBookmarked = ref.watch(bookmarkedIdsProvider).contains(opportunityId);
+    final opportunityAsync = ref.watch(opportunityStreamProvider(opportunityId));
+    final bookmarkedIds = ref.watch(bookmarkedIdsStreamProvider).value ?? {};
+    final hasAppliedAsync = ref.watch(hasAppliedStreamProvider(opportunityId));
+    final applyState = ref.watch(applyActionProvider(opportunityId));
 
-    if (opportunity == null) {
-      return Scaffold(
+    return opportunityAsync.when(
+      loading: () => const Scaffold(body: LoadingIndicator()),
+      error: (error, _) => Scaffold(
         appBar: AppBar(),
-        body: const EmptyStateWidget(
-          title: HomeStrings.noResults,
-          icon: Icons.work_off_outlined,
+        body: ErrorStateWidget(
+          message: OpportunityStrings.loadError,
+          onRetry: () => ref.invalidate(opportunityStreamProvider(opportunityId)),
         ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 220,
-            pinned: true,
-            stretch: true,
-            backgroundColor: Color(opportunity.startupColor),
-            leading: IconButton(
-              onPressed: () => context.pop(),
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              color: Colors.white,
+      ),
+      data: (snapshot) {
+        final opportunity = snapshot.opportunity;
+        if (opportunity == null) {
+          return Scaffold(
+            appBar: AppBar(),
+            body: const ErrorStateWidget(
+              message: OpportunityStrings.emptyOpportunities,
             ),
-            actions: [
-              BookmarkButton(
-                isBookmarked: isBookmarked,
-                onPressed: () => ref
-                    .read(bookmarkedIdsProvider.notifier)
-                    .toggle(opportunityId),
-                light: true,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(opportunity.startupColor),
-                      AppColors.secondary,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg,
-                  96,
-                  AppSpacing.lg,
-                  AppSpacing.lg,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    StartupLogoAvatar(
-                      opportunity: opportunity,
-                      size: 64,
-                      heroTag: 'logo-$opportunityId',
-                    ),
-                    const Spacer(),
-                    Hero(
-                      tag: 'title-$opportunityId',
-                      child: Material(
-                        color: Colors.transparent,
-                        child: Text(
-                          opportunity.title,
-                          style:
-                              Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                    color: Colors.white,
+          );
+        }
+
+        final isBookmarked = bookmarkedIds.contains(opportunityId);
+        final hasApplied = hasAppliedAsync.value ?? false;
+        final isApplying = applyState.isLoading;
+        final deadlineLabel =
+            DateFormat.yMMMd().format(opportunity.deadline);
+
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: Column(
+            children: [
+              if (snapshot.isOffline) const OfflineBanner(),
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      expandedHeight: 220,
+                      pinned: true,
+                      stretch: true,
+                      backgroundColor: Color(opportunity.startupColor),
+                      leading: IconButton(
+                        onPressed: () => context.pop(),
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                        color: Colors.white,
+                      ),
+                      actions: [
+                        BookmarkButton(
+                          isBookmarked: isBookmarked,
+                          onPressed: () => ref
+                              .read(bookmarkToggleProvider.notifier)
+                              .toggle(opportunityId),
+                          light: true,
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                      ],
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Color(opportunity.startupColor),
+                                AppColors.secondary,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg,
+                            96,
+                            AppSpacing.lg,
+                            AppSpacing.lg,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              StartupLogoAvatar(
+                                opportunity: opportunity,
+                                size: 64,
+                                heroTag: 'logo-$opportunityId',
+                              ),
+                              const Spacer(),
+                              Hero(
+                                tag: 'title-$opportunityId',
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: Text(
+                                    opportunity.title,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall
+                                        ?.copyWith(color: Colors.white),
                                   ),
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      opportunity.startupName,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge
+                                          ?.copyWith(
+                                            color: Colors.white
+                                                .withValues(alpha: 0.9),
+                                          ),
+                                    ),
+                                  ),
+                                  if (opportunity.isVerified)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            Colors.white.withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        OpportunityStrings.verified,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(color: Colors.white),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      opportunity.startupName,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
+                    SliverPadding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          _DetailsMetaGrid(
+                            opportunity: opportunity,
+                            deadlineLabel: deadlineLabel,
                           ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Wrap(
+                            spacing: AppSpacing.sm,
+                            runSpacing: AppSpacing.sm,
+                            children: opportunity.skills
+                                .map((skill) => OpportunityTagChip(label: skill))
+                                .toList(),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+                          Text(
+                            HomeStrings.aboutOpportunity,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            opportunity.description,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  height: 1.6,
+                                ),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+                          Text(
+                            HomeStrings.skillsRequired,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Wrap(
+                            spacing: AppSpacing.sm,
+                            runSpacing: AppSpacing.sm,
+                            children: opportunity.skills
+                                .map((skill) => OpportunityTagChip(label: skill))
+                                .toList(),
+                          ),
+                          const SizedBox(height: 120),
+                        ]),
+                      ),
                     ),
                   ],
                 ),
               ),
+            ],
+          ),
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: PrimaryButton(
+                label: hasApplied
+                    ? OpportunityStrings.applied
+                    : isApplying
+                        ? OpportunityStrings.applying
+                        : OpportunityStrings.applyNow,
+                isLoading: isApplying,
+                onPressed: hasApplied || isApplying
+                    ? null
+                    : () => _handleApply(context, ref),
+              ),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                _DetailsMetaGrid(opportunity: opportunity),
-                const SizedBox(height: AppSpacing.lg),
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: opportunity.tags
-                      .map((tag) => OpportunityTagChip(label: tag))
-                      .toList(),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  HomeStrings.aboutOpportunity,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  opportunity.description,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textSecondary,
-                        height: 1.6,
-                      ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  HomeStrings.skillsRequired,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: opportunity.tags
-                      .map((tag) => OpportunityTagChip(label: tag))
-                      .toList(),
-                ),
-                const SizedBox(height: 120),
-              ]),
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: PrimaryButton(
-            label: HomeStrings.applyNow,
-            onPressed: () {},
-          ),
-        ),
-      ),
+        );
+      },
     );
+  }
+
+  Future<void> _handleApply(BuildContext context, WidgetRef ref) async {
+    final error = await ref
+        .read(applyActionProvider(opportunityId).notifier)
+        .apply();
+
+    if (!context.mounted) {
+      return;
+    }
+
+    if (error != null) {
+      context.showSnackBar(error, isError: true);
+      return;
+    }
+
+    context.showSnackBar(OpportunityStrings.applicationSuccess);
   }
 }
 
 class _DetailsMetaGrid extends StatelessWidget {
-  const _DetailsMetaGrid({required this.opportunity});
+  const _DetailsMetaGrid({
+    required this.opportunity,
+    required this.deadlineLabel,
+  });
 
   final OpportunityEntity opportunity;
+  final String deadlineLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -184,15 +276,9 @@ class _DetailsMetaGrid extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _MetaRow(
-            icon: Icons.schedule_rounded,
-            label: opportunity.weeklyHours,
-          ),
+          _MetaRow(icon: Icons.schedule_rounded, label: opportunity.hoursLabel),
           const Divider(height: 24),
-          _MetaRow(
-            icon: Icons.place_outlined,
-            label: opportunity.location,
-          ),
+          _MetaRow(icon: Icons.place_outlined, label: opportunity.location),
           const Divider(height: 24),
           _MetaRow(
             icon: Icons.laptop_mac_rounded,
@@ -202,6 +288,11 @@ class _DetailsMetaGrid extends StatelessWidget {
           _MetaRow(
             icon: Icons.category_outlined,
             label: opportunity.category.label,
+          ),
+          const Divider(height: 24),
+          _MetaRow(
+            icon: Icons.event_outlined,
+            label: '${OpportunityStrings.deadline}: $deadlineLabel',
           ),
           const Divider(height: 24),
           _MetaRow(
@@ -230,10 +321,7 @@ class _MetaRow extends StatelessWidget {
         Icon(icon, size: 20, color: AppColors.primary),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
         ),
       ],
     );

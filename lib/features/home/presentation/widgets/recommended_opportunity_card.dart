@@ -115,9 +115,9 @@ class RecommendedOpportunityCard extends StatelessWidget {
                     spacing: AppSpacing.sm,
                     runSpacing: AppSpacing.sm,
                     children: [
-                      ...opportunity.tags.take(3).map(
-                            (tag) => OpportunityTagChip(
-                              label: tag,
+                      ...opportunity.skills.take(3).map(
+                            (skill) => OpportunityTagChip(
+                              label: skill,
                               onLightBackground: false,
                             ),
                           ),
@@ -132,7 +132,7 @@ class RecommendedOpportunityCard extends StatelessWidget {
                     children: [
                       _MetaChip(
                         icon: Icons.schedule_rounded,
-                        label: opportunity.weeklyHours,
+                        label: opportunity.hoursLabel,
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       _MetaChip(
