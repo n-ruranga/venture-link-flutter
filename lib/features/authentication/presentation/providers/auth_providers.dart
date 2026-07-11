@@ -6,11 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:venture_link/core/services/local_storage_service.dart';
 import 'package:venture_link/features/authentication/data/datasources/firebase_auth_datasource.dart';
-import 'package:venture_link/features/authentication/data/datasources/firestore_user_datasource.dart';
 import 'package:venture_link/features/authentication/data/repositories/auth_repository_impl.dart';
 import 'package:venture_link/features/authentication/domain/entities/user_entity.dart';
 import 'package:venture_link/features/authentication/domain/repositories/auth_repository.dart';
 import 'package:venture_link/features/authentication/presentation/providers/auth_state.dart';
+import 'package:venture_link/features/profile/presentation/providers/profile_repository_providers.dart';
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError(
@@ -34,14 +34,10 @@ final firebaseAuthDatasourceProvider = Provider<FirebaseAuthDatasource>((ref) {
   return FirebaseAuthDatasource(ref.watch(firebaseAuthProvider));
 });
 
-final firestoreUserDatasourceProvider = Provider<FirestoreUserDatasource>((ref) {
-  return FirestoreUserDatasource(ref.watch(firestoreProvider));
-});
-
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepositoryImpl(
     authDatasource: ref.watch(firebaseAuthDatasourceProvider),
-    firestoreUserDatasource: ref.watch(firestoreUserDatasourceProvider),
+    profileRepository: ref.watch(profileRepositoryProvider),
   );
 });
 

@@ -12,6 +12,8 @@ import 'package:venture_link/features/authentication/presentation/screens/onboar
 import 'package:venture_link/features/authentication/presentation/screens/register_screen.dart';
 import 'package:venture_link/features/authentication/presentation/screens/splash_screen.dart';
 import 'package:venture_link/features/home/presentation/screens/home_screen.dart';
+import 'package:venture_link/features/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:venture_link/features/profile/presentation/screens/profile_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -88,6 +90,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => fadeTransitionPage(
           key: state.pageKey,
           child: const HomeScreen(),
+        ),
+      ),
+      GoRoute(
+        path: RouteNames.profile,
+        name: 'profile',
+        pageBuilder: (context, state) => slideTransitionPage(
+          key: state.pageKey,
+          child: const ProfileScreen(),
+        ),
+      ),
+      GoRoute(
+        path: RouteNames.editProfile,
+        name: 'editProfile',
+        pageBuilder: (context, state) => slideTransitionPage(
+          key: state.pageKey,
+          child: const EditProfileScreen(),
         ),
       ),
     ],

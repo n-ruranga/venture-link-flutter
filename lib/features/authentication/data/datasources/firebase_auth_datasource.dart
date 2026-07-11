@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:venture_link/features/authentication/data/models/user_model.dart';
 
 class FirebaseAuthDatasource {
   FirebaseAuthDatasource(this._firebaseAuth);
@@ -10,7 +9,7 @@ class FirebaseAuthDatasource {
 
   User? get currentFirebaseUser => _firebaseAuth.currentUser;
 
-  Future<UserModel> signInWithEmailAndPassword({
+  Future<User> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
@@ -22,10 +21,10 @@ class FirebaseAuthDatasource {
     if (user == null) {
       throw FirebaseAuthException(code: 'user-not-found');
     }
-    return UserModel.fromFirebaseUser(user);
+    return user;
   }
 
-  Future<UserModel> createUserWithEmailAndPassword({
+  Future<User> createUserWithEmailAndPassword({
     required String email,
     required String password,
     required String displayName,
@@ -40,9 +39,7 @@ class FirebaseAuthDatasource {
     }
     await user.updateDisplayName(displayName.trim());
     await user.sendEmailVerification();
-    return UserModel.fromFirebaseUser(user).copyWith(
-      displayName: displayName.trim(),
-    );
+    return user;
   }
 
   Future<void> signOut() => _firebaseAuth.signOut();
@@ -59,7 +56,7 @@ class FirebaseAuthDatasource {
     await user.sendEmailVerification();
   }
 
-  Future<UserModel> reloadUser() async {
+  Future<User> reloadUser() async {
     final user = _firebaseAuth.currentUser;
     if (user == null) {
       throw FirebaseAuthException(code: 'user-not-found');
@@ -69,14 +66,6 @@ class FirebaseAuthDatasource {
     if (refreshedUser == null) {
       throw FirebaseAuthException(code: 'user-not-found');
     }
-    return UserModel.fromFirebaseUser(refreshedUser);
-  }
-
-  UserModel? getCurrentUserModel() {
-    final user = _firebaseAuth.currentUser;
-    if (user == null) {
-      return null;
-    }
-    return UserModel.fromFirebaseUser(user);
+    return refreshedUser;
   }
 }

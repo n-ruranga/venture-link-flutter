@@ -1,35 +1,30 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:venture_link/features/authentication/data/datasources/firebase_auth_datasource.dart';
-import 'package:venture_link/features/authentication/data/datasources/firestore_user_datasource.dart';
-import 'package:venture_link/features/authentication/data/models/user_model.dart';
 import 'package:venture_link/features/authentication/domain/entities/user_entity.dart';
 import 'package:venture_link/features/authentication/domain/repositories/auth_repository.dart';
+import 'package:venture_link/features/profile/domain/repositories/profile_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required this.authDatasource,
-    required this.firestoreUserDatasource,
+    required this.profileRepository,
   });
 
   final FirebaseAuthDatasource authDatasource;
-  final FirestoreUserDatasource firestoreUserDatasource;
+  final ProfileRepository profileRepository;
 
   @override
   Stream<UserEntity?> get authStateChanges {
-    return authDatasource.authStateChanges.asyncMap((user) async {
-      if (user == null) {
-        return null;
-      }
-      return _resolveUser(UserModel.fromFirebaseUser(user));
-    });
+    return authDatasource.authStateChanges.asyncMap(_resolveUser);
   }
 
   @override
   Future<UserEntity?> getCurrentUser() async {
-    final firebaseUser = authDatasource.getCurrentUserModel();
-    if (firebaseUser == null) {
+    final user = authDatasource.currentFirebaseUser;
+    if (user == null) {
       return null;
     }
-    return _resolveUser(firebaseUser);
+    return _resolveUser(user);
   }
 
   @override
@@ -41,7 +36,7 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       password: password,
     );
-    return await _resolveUser(user) ?? user.toEntity();
+    return await _resolveUser(user) ?? _fallbackEntity(user);
   }
 
   @override
@@ -56,14 +51,13 @@ class AuthRepositoryImpl implements AuthRepository {
       displayName: displayName,
     );
 
-    final userModel = user.copyWith(
-      displayName: displayName.trim(),
-      role: 'student',
-      createdAt: DateTime.now(),
+    await profileRepository.createInitialProfile(
+      uid: user.uid,
+      email: user.email ?? email.trim(),
+      fullName: displayName.trim(),
     );
 
-    await firestoreUserDatasource.createUser(userModel);
-    return userModel.toEntity();
+    return await _resolveUser(user) ?? _fallbackEntity(user);
   }
 
   @override
@@ -82,21 +76,39 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<UserEntity> reloadUser() async {
     final user = await authDatasource.reloadUser();
-    if (user.isEmailVerified) {
-      await firestoreUserDatasource.updateEmailVerified(user.uid, true);
+    if (user.emailVerified) {
+      await profileRepository.updateEmailVerified(user.uid, true);
     }
-    return await _resolveUser(user) ?? user.toEntity();
+    return await _resolveUser(user) ?? _fallbackEntity(user);
   }
 
-  Future<UserEntity?> _resolveUser(UserModel userModel) async {
-    final firestoreUser =
-        await firestoreUserDatasource.getUser(userModel.uid);
-    final mergedUser = firestoreUser?.copyWith(
-          isEmailVerified: userModel.isEmailVerified,
-          displayName: firestoreUser.displayName ?? userModel.displayName,
-        ) ??
-        userModel;
+  Future<UserEntity?> _resolveUser(User? user) async {
+    if (user == null) {
+      return null;
+    }
 
-    return mergedUser.toEntity();
+    final profile = await profileRepository.getProfile(user.uid);
+    if (profile == null) {
+      return _fallbackEntity(user);
+    }
+
+    return UserEntity(
+      uid: profile.uid,
+      email: profile.email,
+      displayName: profile.fullName,
+      isEmailVerified: user.emailVerified,
+      role: profile.role,
+      skills: profile.skills,
+      createdAt: profile.createdAt,
+    );
+  }
+
+  UserEntity _fallbackEntity(User user) {
+    return UserEntity(
+      uid: user.uid,
+      email: user.email ?? '',
+      displayName: user.displayName,
+      isEmailVerified: user.emailVerified,
+    );
   }
 }

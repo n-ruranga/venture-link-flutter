@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:venture_link/core/constants/auth_strings.dart';
 import 'package:venture_link/core/constants/colors.dart';
+import 'package:venture_link/core/constants/profile_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
 import 'package:venture_link/core/constants/strings.dart';
+import 'package:venture_link/core/routes/route_names.dart';
 import 'package:venture_link/features/authentication/presentation/providers/auth_providers.dart';
+import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
 import 'package:venture_link/shared/extensions/context_extensions.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
 import 'package:venture_link/shared/widgets/primary_button.dart';
+import 'package:venture_link/shared/widgets/secondary_button.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -22,11 +27,17 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authAsync = ref.watch(authNotifierProvider);
+    final profileAsync = ref.watch(userProfileStreamProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppStrings.appName),
         actions: [
+          IconButton(
+            onPressed: () => context.push(RouteNames.profile),
+            icon: const Icon(Icons.person_outline_rounded),
+            tooltip: ProfileStrings.profile,
+          ),
           IconButton(
             onPressed: authAsync.isLoading
                 ? null
@@ -45,7 +56,9 @@ class HomeScreen extends ConsumerWidget {
           }
 
           final user = authState.user!;
-          final displayName = user.displayName ?? user.email.split('@').first;
+          final profile = profileAsync.value;
+          final displayName =
+              profile?.fullName ?? user.displayName ?? user.email.split('@').first;
 
           return Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
@@ -68,9 +81,10 @@ class HomeScreen extends ConsumerWidget {
                     children: [
                       Text(
                         'Welcome, $displayName!',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: Colors.white,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: Colors.white,
+                                ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
@@ -79,6 +93,15 @@ class HomeScreen extends ConsumerWidget {
                               color: Colors.white.withValues(alpha: 0.85),
                             ),
                       ),
+                      if (profile != null) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          '${ProfileStrings.profileCompletion}: ${profile.completionPercentage}%',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -96,6 +119,12 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const Spacer(),
                 PrimaryButton(
+                  label: ProfileStrings.profile,
+                  icon: Icons.person_outline_rounded,
+                  onPressed: () => context.push(RouteNames.profile),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                SecondaryButton(
                   label: AuthStrings.logout,
                   icon: Icons.logout_rounded,
                   onPressed: () => _handleLogout(ref, context),

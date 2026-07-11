@@ -1,4 +1,5 @@
 import 'package:venture_link/core/constants/auth_strings.dart';
+import 'package:venture_link/core/constants/profile_strings.dart';
 
 abstract final class Validators {
   static final RegExp _emailRegex = RegExp(
@@ -60,6 +61,41 @@ abstract final class Validators {
     }
     if (value.trim().length < 2) {
       return AuthStrings.nameTooShort;
+    }
+    return null;
+  }
+
+  static String? validateOptionalUrl(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    final uri = Uri.tryParse(value.trim());
+    if (uri == null || !uri.hasScheme) {
+      return ProfileStrings.invalidUrl;
+    }
+    return null;
+  }
+
+  static String? validateDegree(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return ProfileStrings.degreeRequired;
+    }
+    return null;
+  }
+
+  static String? validateYear(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return ProfileStrings.yearRequired;
+    }
+    return null;
+  }
+
+  static String? validateBio(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    if (value.trim().length < 10) {
+      return ProfileStrings.bioTooShort;
     }
     return null;
   }
