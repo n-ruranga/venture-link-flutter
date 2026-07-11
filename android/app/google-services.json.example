@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "747484615155",
-    "project_id": "venture-link-8cc2e",
-    "storage_bucket": "venture-link-8cc2e.firebasestorage.app"
+    "project_number": "YOUR_MESSAGING_SENDER_ID",
+    "project_id": "YOUR_PROJECT_ID",
+    "storage_bucket": "YOUR_PROJECT_ID.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:747484615155:android:7e6f45b322f5ad7f28c286",
+        "mobilesdk_app_id": "YOUR_ANDROID_APP_ID",
         "android_client_info": {
           "package_name": "com.example.venture_link"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBocXPZST3eZxCz9pENt3Kl01MJXJ7bX74"
+          "current_key": "YOUR_ANDROID_API_KEY"
         }
       ],
       "services": {
