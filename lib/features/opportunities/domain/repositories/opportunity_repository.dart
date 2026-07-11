@@ -4,16 +4,6 @@ abstract class OpportunityRepository {
   Stream<OpportunitiesSnapshot> watchOpportunities();
 
   Stream<OpportunitySnapshot> watchOpportunity(String id);
-
-  Future<void> apply({
-    required String opportunityId,
-    required String studentId,
-  });
-
-  Stream<bool> watchHasApplied({
-    required String opportunityId,
-    required String studentId,
-  });
 }
 
 abstract class BookmarkRepository {

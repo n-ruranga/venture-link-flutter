@@ -1,6 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:venture_link/core/constants/opportunity_strings.dart';
-import 'package:venture_link/core/utils/firebase_auth_exception_mapper.dart';
 import 'package:venture_link/features/opportunities/domain/entities/opportunity_category.dart';
 import 'package:venture_link/features/opportunities/domain/entities/opportunity_entity.dart';
 import 'package:venture_link/features/opportunities/presentation/providers/opportunity_repository_providers.dart';
@@ -22,18 +20,6 @@ final bookmarkedIdsStreamProvider = StreamProvider<Set<String>>((ref) {
     return Stream.value({});
   }
   return ref.watch(bookmarkRepositoryProvider).watchBookmarkedIds(userId);
-});
-
-final hasAppliedStreamProvider =
-    StreamProvider.family<bool, String>((ref, opportunityId) {
-  final userId = ref.watch(currentUserIdProvider);
-  if (userId == null) {
-    return Stream.value(false);
-  }
-  return ref.watch(opportunityRepositoryProvider).watchHasApplied(
-        opportunityId: opportunityId,
-        studentId: userId,
-      );
 });
 
 final opportunityCategoriesProvider =
@@ -148,41 +134,6 @@ List<OpportunityEntity> _filterOpportunities({
   }
 
   return results;
-}
-
-final applyActionProvider =
-    AsyncNotifierProvider.family<ApplyActionNotifier, void, String>(
-  ApplyActionNotifier.new,
-);
-
-class ApplyActionNotifier extends FamilyAsyncNotifier<void, String> {
-  @override
-  Future<void> build(String arg) async {}
-
-  Future<String?> apply() async {
-    final userId = ref.read(currentUserIdProvider);
-    if (userId == null) {
-      return OpportunityStrings.applyError;
-    }
-
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      await ref.read(opportunityRepositoryProvider).apply(
-            opportunityId: arg,
-            studentId: userId,
-          );
-    });
-
-    if (state.hasError) {
-      final error = state.error!;
-      if (error is StateError) {
-        return error.message;
-      }
-      return FirebaseAuthExceptionMapper.mapGeneric(error);
-    }
-
-    return null;
-  }
 }
 
 final bookmarkToggleProvider =

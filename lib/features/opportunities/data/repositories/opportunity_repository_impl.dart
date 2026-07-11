@@ -17,28 +17,6 @@ class OpportunityRepositoryImpl implements OpportunityRepository {
   Stream<OpportunitySnapshot> watchOpportunity(String id) {
     return datasource.watchOpportunity(id);
   }
-
-  @override
-  Future<void> apply({
-    required String opportunityId,
-    required String studentId,
-  }) {
-    return datasource.apply(
-      opportunityId: opportunityId,
-      studentId: studentId,
-    );
-  }
-
-  @override
-  Stream<bool> watchHasApplied({
-    required String opportunityId,
-    required String studentId,
-  }) {
-    return datasource.watchHasApplied(
-      opportunityId: opportunityId,
-      studentId: studentId,
-    );
-  }
 }
 
 class BookmarkRepositoryImpl implements BookmarkRepository {

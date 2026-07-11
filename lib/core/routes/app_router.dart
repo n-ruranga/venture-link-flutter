@@ -11,6 +11,7 @@ import 'package:venture_link/features/authentication/presentation/screens/login_
 import 'package:venture_link/features/authentication/presentation/screens/onboarding_screen.dart';
 import 'package:venture_link/features/authentication/presentation/screens/register_screen.dart';
 import 'package:venture_link/features/authentication/presentation/screens/splash_screen.dart';
+import 'package:venture_link/features/applications/presentation/screens/applications_screen.dart';
 import 'package:venture_link/features/home/presentation/screens/explore_screen.dart';
 import 'package:venture_link/features/home/presentation/screens/home_screen.dart';
 import 'package:venture_link/features/home/presentation/screens/main_shell.dart';

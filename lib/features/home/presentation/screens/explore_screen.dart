@@ -163,20 +163,3 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     );
   }
 }
-
-class ApplicationsScreen extends StatelessWidget {
-  const ApplicationsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(HomeStrings.navApplications),
-      ),
-      body: const Center(
-        child: Text(HomeStrings.applicationsComingSoon),
-      ),
-    );
-  }
-}

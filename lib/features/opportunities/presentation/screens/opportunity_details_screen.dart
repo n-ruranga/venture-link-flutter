@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:venture_link/core/constants/application_strings.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/dimensions.dart';
 import 'package:venture_link/core/constants/home_strings.dart';
 import 'package:venture_link/core/constants/opportunity_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
+import 'package:venture_link/features/applications/presentation/providers/application_providers.dart';
+import 'package:venture_link/features/applications/presentation/widgets/application_status_chip.dart';
+import 'package:venture_link/features/applications/presentation/widgets/application_timeline.dart';
+import 'package:venture_link/features/applications/presentation/widgets/apply_application_sheet.dart';
 import 'package:venture_link/features/opportunities/domain/entities/opportunity_entity.dart';
 import 'package:venture_link/features/opportunities/presentation/providers/opportunity_providers.dart';
 import 'package:venture_link/features/opportunities/presentation/widgets/opportunity_shared_widgets.dart';
 import 'package:venture_link/features/opportunities/presentation/widgets/opportunity_state_widgets.dart';
-import 'package:venture_link/shared/extensions/context_extensions.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
 import 'package:venture_link/shared/widgets/primary_button.dart';
@@ -28,7 +32,9 @@ class OpportunityDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final opportunityAsync = ref.watch(opportunityStreamProvider(opportunityId));
     final bookmarkedIds = ref.watch(bookmarkedIdsStreamProvider).value ?? {};
-    final hasAppliedAsync = ref.watch(hasAppliedStreamProvider(opportunityId));
+    final hasApplied = ref.watch(hasAppliedStreamProvider(opportunityId));
+    final applicationAsync =
+        ref.watch(studentApplicationForOpportunityProvider(opportunityId));
     final applyState = ref.watch(applyActionProvider(opportunityId));
 
     return opportunityAsync.when(
@@ -52,8 +58,8 @@ class OpportunityDetailsScreen extends ConsumerWidget {
         }
 
         final isBookmarked = bookmarkedIds.contains(opportunityId);
-        final hasApplied = hasAppliedAsync.value ?? false;
         final isApplying = applyState.isLoading;
+        final application = applicationAsync.value;
         final deadlineLabel =
             DateFormat.yMMMd().format(opportunity.deadline);
 
@@ -183,6 +189,26 @@ class OpportunityDetailsScreen extends ConsumerWidget {
                                 .toList(),
                           ),
                           const SizedBox(height: AppSpacing.xl),
+                          if (application != null) ...[
+                            Row(
+                              children: [
+                                Text(
+                                  ApplicationStrings.timeline,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const Spacer(),
+                                ApplicationStatusChip(
+                                  status: application.status,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            ApplicationTimeline(
+                              currentStatus: application.status,
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
+                          ],
                           Text(
                             HomeStrings.aboutOpportunity,
                             style: Theme.of(context).textTheme.titleMedium,
@@ -229,30 +255,17 @@ class OpportunityDetailsScreen extends ConsumerWidget {
                 isLoading: isApplying,
                 onPressed: hasApplied || isApplying
                     ? null
-                    : () => _handleApply(context, ref),
+                    : () => ApplyApplicationSheet.show(
+                          context,
+                          opportunityId: opportunityId,
+                          startupId: opportunity.startupId,
+                        ),
               ),
             ),
           ),
         );
       },
     );
-  }
-
-  Future<void> _handleApply(BuildContext context, WidgetRef ref) async {
-    final error = await ref
-        .read(applyActionProvider(opportunityId).notifier)
-        .apply();
-
-    if (!context.mounted) {
-      return;
-    }
-
-    if (error != null) {
-      context.showSnackBar(error, isError: true);
-      return;
-    }
-
-    context.showSnackBar(OpportunityStrings.applicationSuccess);
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:venture_link/core/constants/auth_strings.dart';
+import 'package:venture_link/core/constants/application_strings.dart';
 import 'package:venture_link/core/constants/profile_strings.dart';
 
 abstract final class Validators {
@@ -96,6 +97,16 @@ abstract final class Validators {
     }
     if (value.trim().length < 10) {
       return ProfileStrings.bioTooShort;
+    }
+    return null;
+  }
+
+  static String? validateCoverLetter(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return ApplicationStrings.coverLetterRequired;
+    }
+    if (value.trim().length < 20) {
+      return ApplicationStrings.coverLetterTooShort;
     }
     return null;
   }

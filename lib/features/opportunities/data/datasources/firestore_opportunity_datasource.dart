@@ -11,9 +11,6 @@ class FirestoreOpportunityDatasource {
   CollectionReference<Map<String, dynamic>> get _collection =>
       _firestore.collection('opportunities');
 
-  CollectionReference<Map<String, dynamic>> get _applicationsCollection =>
-      _firestore.collection('applications');
-
   Stream<OpportunitiesSnapshot> watchOpportunities() {
     return _collection
         .where('status', isEqualTo: OpportunityStatus.active.value)
@@ -37,41 +34,6 @@ class FirestoreOpportunityDatasource {
         hasPendingWrites: snapshot.metadata.hasPendingWrites,
       );
     });
-  }
-
-  Future<void> apply({
-    required String opportunityId,
-    required String studentId,
-  }) async {
-    final existing = await _applicationsCollection
-        .where('studentId', isEqualTo: studentId)
-        .where('opportunityId', isEqualTo: opportunityId)
-        .limit(1)
-        .get();
-
-    if (existing.docs.isNotEmpty) {
-      throw StateError(OpportunityStrings.alreadyApplied);
-    }
-
-    await _applicationsCollection.add({
-      'studentId': studentId,
-      'opportunityId': opportunityId,
-      'status': 'applied',
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
-  }
-
-  Stream<bool> watchHasApplied({
-    required String opportunityId,
-    required String studentId,
-  }) {
-    return _applicationsCollection
-        .where('studentId', isEqualTo: studentId)
-        .where('opportunityId', isEqualTo: opportunityId)
-        .limit(1)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.isNotEmpty);
   }
 
   OpportunitiesSnapshot _mapOpportunitiesSnapshot(
