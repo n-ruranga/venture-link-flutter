@@ -20,8 +20,12 @@ import 'package:venture_link/features/startup/presentation/screens/create_opport
 import 'package:venture_link/features/startup/presentation/screens/edit_opportunity_screen.dart';
 import 'package:venture_link/features/startup/presentation/screens/startup_applicants_screen.dart';
 import 'package:venture_link/features/startup/presentation/screens/startup_dashboard_screen.dart';
+import 'package:venture_link/features/admin/presentation/screens/admin_dashboard_screen.dart';
+import 'package:venture_link/features/admin/presentation/screens/verify_users_screen.dart';
 import 'package:venture_link/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:venture_link/features/profile/presentation/screens/profile_screen.dart';
+import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
+import 'package:venture_link/core/constants/user_roles.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -212,6 +216,24 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
+      GoRoute(
+        path: RouteNames.adminDashboard,
+        name: 'adminDashboard',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) => slideTransitionPage(
+          key: state.pageKey,
+          child: const AdminDashboardScreen(),
+        ),
+      ),
+      GoRoute(
+        path: RouteNames.verifyStartups,
+        name: 'verifyStartups',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) => slideTransitionPage(
+          key: state.pageKey,
+          child: const VerifyUsersScreen(),
+        ),
+      ),
     ],
   );
 });
@@ -244,6 +266,13 @@ String? _redirect(Ref ref, GoRouterState state) {
   };
 
   if (authState.isAuthenticated) {
+    if (location.startsWith('/admin/')) {
+      final profile = ref.read(userProfileStreamProvider).value;
+      if (profile?.role != UserRoles.admin) {
+        return RouteNames.home;
+      }
+    }
+
     if (publicRoutes.contains(location) ||
         location == RouteNames.emailVerification) {
       return RouteNames.home;
@@ -268,6 +297,7 @@ String? _redirect(Ref ref, GoRouterState state) {
       !shellRoutes.contains(location) &&
       !location.startsWith('/opportunities/') &&
       !location.startsWith('/startup/') &&
+      !location.startsWith('/admin/') &&
       location != RouteNames.editProfile) {
     return RouteNames.login;
   }

@@ -107,6 +107,28 @@ class FirestoreOpportunityDatasource {
     });
   }
 
+  Future<void> syncStartupName({
+    required String startupId,
+    required String startupName,
+  }) async {
+    final snapshot = await _collection
+        .where('startupId', isEqualTo: startupId)
+        .get();
+
+    if (snapshot.docs.isEmpty) {
+      return;
+    }
+
+    final batch = _firestore.batch();
+    for (final doc in snapshot.docs) {
+      batch.update(doc.reference, {
+        'startupName': startupName,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    }
+    await batch.commit();
+  }
+
   Future<void> _assertOwnership({
     required String opportunityId,
     required String startupId,

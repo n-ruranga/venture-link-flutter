@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venture_link/core/constants/admin_strings.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/profile_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
 import 'package:venture_link/core/constants/strings.dart';
 import 'package:venture_link/core/constants/startup_strings.dart';
+import 'package:venture_link/core/providers/user_context_providers.dart';
 import 'package:venture_link/core/routes/route_names.dart';
-import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
 import 'package:venture_link/features/profile/domain/entities/user_profile_entity.dart';
 import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
 import 'package:venture_link/features/profile/presentation/widgets/profile_widgets.dart';
@@ -24,6 +25,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileStreamProvider);
     final isStartup = ref.watch(isStartupUserProvider);
+    final isAdmin = ref.watch(isAdminUserProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -56,7 +58,11 @@ class ProfileScreen extends ConsumerWidget {
             );
           }
 
-          return _ProfileContent(profile: profile, isStartup: isStartup);
+          return _ProfileContent(
+            profile: profile,
+            isStartup: isStartup,
+            isAdmin: isAdmin,
+          );
         },
       ),
     );
@@ -67,10 +73,12 @@ class _ProfileContent extends StatelessWidget {
   const _ProfileContent({
     required this.profile,
     required this.isStartup,
+    required this.isAdmin,
   });
 
   final UserProfileEntity profile;
   final bool isStartup;
+  final bool isAdmin;
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +171,14 @@ class _ProfileContent extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
+          if (isAdmin) ...[
+            PrimaryButton(
+              label: AdminStrings.dashboard,
+              icon: Icons.admin_panel_settings_outlined,
+              onPressed: () => context.push(RouteNames.adminDashboard),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
           if (isStartup) ...[
             PrimaryButton(
               label: StartupStrings.dashboard,

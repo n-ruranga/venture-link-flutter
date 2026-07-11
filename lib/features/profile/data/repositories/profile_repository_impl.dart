@@ -1,12 +1,18 @@
+import 'package:venture_link/core/constants/user_roles.dart';
+import 'package:venture_link/features/opportunities/domain/repositories/opportunity_repository.dart';
 import 'package:venture_link/features/profile/data/datasources/firestore_profile_datasource.dart';
 import 'package:venture_link/features/profile/data/models/user_model.dart';
 import 'package:venture_link/features/profile/domain/entities/user_profile_entity.dart';
 import 'package:venture_link/features/profile/domain/repositories/profile_repository.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
-  ProfileRepositoryImpl(this.datasource);
+  ProfileRepositoryImpl({
+    required this.datasource,
+    required this.opportunityRepository,
+  });
 
   final FirestoreProfileDatasource datasource;
+  final OpportunityRepository opportunityRepository;
 
   @override
   Future<void> createInitialProfile({
@@ -35,6 +41,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Future<UserProfileEntity> updateProfile(UserProfileEntity profile) async {
+    final existing = await getProfile(profile.uid);
     final isComplete = UserModel.calculateIsComplete(profile);
     final updatedProfile = profile.copyWith(
       isProfileComplete: isComplete,
@@ -42,6 +49,16 @@ class ProfileRepositoryImpl implements ProfileRepository {
     );
     final model = UserModel.fromEntity(updatedProfile);
     await datasource.updateProfile(model);
+
+    final nameChanged = existing != null &&
+        existing.fullName.trim() != updatedProfile.fullName.trim();
+    if (nameChanged && updatedProfile.role == UserRoles.startup) {
+      await opportunityRepository.syncStartupName(
+        startupId: updatedProfile.uid,
+        startupName: updatedProfile.fullName.trim(),
+      );
+    }
+
     return updatedProfile;
   }
 

@@ -28,3 +28,8 @@ final isStartupUserProvider = Provider<bool>((ref) {
   final profile = ref.watch(userProfileProvider);
   return profile?.role == UserRoles.startup;
 });
+
+final isAdminUserProvider = Provider<bool>((ref) {
+  final profile = ref.watch(userProfileProvider);
+  return profile?.role == UserRoles.admin;
+});

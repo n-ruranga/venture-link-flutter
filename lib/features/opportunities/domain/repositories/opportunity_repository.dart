@@ -25,6 +25,11 @@ abstract class OpportunityRepository {
     required String opportunityId,
     required String startupId,
   });
+
+  Future<void> syncStartupName({
+    required String startupId,
+    required String startupName,
+  });
 }
 
 abstract class BookmarkRepository {

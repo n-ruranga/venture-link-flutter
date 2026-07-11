@@ -62,6 +62,17 @@ class OpportunityRepositoryImpl implements OpportunityRepository {
       startupId: startupId,
     );
   }
+
+  @override
+  Future<void> syncStartupName({
+    required String startupId,
+    required String startupName,
+  }) {
+    return datasource.syncStartupName(
+      startupId: startupId,
+      startupName: startupName,
+    );
+  }
 }
 
 class BookmarkRepositoryImpl implements BookmarkRepository {
