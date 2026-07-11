@@ -1,5 +1,6 @@
 import 'package:venture_link/core/constants/auth_strings.dart';
 import 'package:venture_link/core/constants/application_strings.dart';
+import 'package:venture_link/core/constants/startup_strings.dart';
 import 'package:venture_link/core/constants/profile_strings.dart';
 
 abstract final class Validators {
@@ -107,6 +108,37 @@ abstract final class Validators {
     }
     if (value.trim().length < 20) {
       return ApplicationStrings.coverLetterTooShort;
+    }
+    return null;
+  }
+
+  static String? validateOpportunityTitle(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return StartupStrings.titleRequired;
+    }
+    return null;
+  }
+
+  static String? validateOpportunityDescription(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return StartupStrings.descriptionRequired;
+    }
+    if (value.trim().length < 30) {
+      return 'Description must be at least 30 characters';
+    }
+    return null;
+  }
+
+  static String? validateOpportunityLocation(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return StartupStrings.locationRequired;
+    }
+    return null;
+  }
+
+  static String? validateOpportunityHours(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return StartupStrings.hoursRequired;
     }
     return null;
   }

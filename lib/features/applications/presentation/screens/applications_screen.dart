@@ -6,7 +6,9 @@ import 'package:venture_link/core/constants/home_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
 import 'package:venture_link/features/applications/domain/entities/application_status.dart';
 import 'package:venture_link/features/applications/presentation/providers/application_providers.dart';
+import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
 import 'package:venture_link/features/applications/presentation/widgets/application_card.dart';
+import 'package:venture_link/features/startup/presentation/widgets/startup_applicants_list.dart';
 import 'package:venture_link/features/opportunities/presentation/widgets/opportunity_state_widgets.dart';
 import 'package:venture_link/shared/extensions/context_extensions.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
@@ -149,11 +151,6 @@ class _StartupApplicationsView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final applicationsAsync = ref.watch(startupApplicationsStreamProvider);
-    final applications = ref.watch(enrichedStartupApplicationsProvider);
-    final startupIds = ref.watch(availableStartupIdsProvider);
-    final selectedStartupId = ref.watch(effectiveStartupIdProvider);
-    final updatingId = ref.watch(updatingApplicationIdProvider);
-    final updateState = ref.watch(updateApplicationStatusProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -168,118 +165,14 @@ class _StartupApplicationsView extends ConsumerWidget {
         ),
         data: (snapshot) {
           return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (snapshot.isFromCache) const OfflineBanner(),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg,
-                  AppSpacing.lg,
-                  AppSpacing.lg,
-                  AppSpacing.sm,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      ApplicationStrings.startupApplications,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      ApplicationStrings.manageApplicants,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-                    if (startupIds.length > 1) ...[
-                      const SizedBox(height: AppSpacing.md),
-                      DropdownButtonFormField<String>(
-                        initialValue: selectedStartupId,
-                        decoration: const InputDecoration(
-                          labelText: ApplicationStrings.selectStartup,
-                        ),
-                        items: startupIds
-                            .map(
-                              (id) => DropdownMenuItem(
-                                value: id,
-                                child: Text(id),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          ref
-                              .read(selectedStartupIdProvider.notifier)
-                              .state = value;
-                        },
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              Expanded(
-                child: applications.isEmpty
-                    ? const _EmptyApplicationsMessage(
-                        message: ApplicationStrings.emptyStartupApplications,
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        itemCount: applications.length,
-                        separatorBuilder: (_, _) =>
-                            const SizedBox(height: AppSpacing.md),
-                        itemBuilder: (context, index) {
-                          final application = applications[index];
-                          final isUpdating = updateState.isLoading &&
-                              updatingId == application.id;
-
-                          return ApplicationCard(
-                            application: application,
-                            showStartupActions: true,
-                            isUpdatingStatus: isUpdating,
-                            onStatusChanged: (status) => _updateStatus(
-                              context,
-                              ref,
-                              application.id,
-                              status,
-                            ),
-                          );
-                        },
-                      ),
-              ),
+              const Expanded(child: StartupApplicantsList()),
             ],
           );
         },
       ),
     );
-  }
-
-  Future<void> _updateStatus(
-    BuildContext context,
-    WidgetRef ref,
-    String applicationId,
-    ApplicationStatus status,
-  ) async {
-    ref.read(updatingApplicationIdProvider.notifier).state = applicationId;
-
-    final error = await ref
-        .read(updateApplicationStatusProvider.notifier)
-        .updateStatus(
-          applicationId: applicationId,
-          status: status,
-        );
-
-    ref.read(updatingApplicationIdProvider.notifier).state = null;
-
-    if (!context.mounted) {
-      return;
-    }
-
-    if (error != null) {
-      context.showSnackBar(error, isError: true);
-      return;
-    }
-
-    context.showSnackBar(ApplicationStrings.statusUpdated);
   }
 }
 

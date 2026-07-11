@@ -16,6 +16,10 @@ import 'package:venture_link/features/home/presentation/screens/explore_screen.d
 import 'package:venture_link/features/home/presentation/screens/home_screen.dart';
 import 'package:venture_link/features/home/presentation/screens/main_shell.dart';
 import 'package:venture_link/features/opportunities/presentation/screens/opportunity_details_screen.dart';
+import 'package:venture_link/features/startup/presentation/screens/create_opportunity_screen.dart';
+import 'package:venture_link/features/startup/presentation/screens/edit_opportunity_screen.dart';
+import 'package:venture_link/features/startup/presentation/screens/startup_applicants_screen.dart';
+import 'package:venture_link/features/startup/presentation/screens/startup_dashboard_screen.dart';
 import 'package:venture_link/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:venture_link/features/profile/presentation/screens/profile_screen.dart';
 
@@ -164,6 +168,50 @@ final routerProvider = Provider<GoRouter>((ref) {
           child: const EditProfileScreen(),
         ),
       ),
+      GoRoute(
+        path: RouteNames.startupDashboard,
+        name: 'startupDashboard',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) => slideTransitionPage(
+          key: state.pageKey,
+          child: const StartupDashboardScreen(),
+        ),
+      ),
+      GoRoute(
+        path: RouteNames.createOpportunity,
+        name: 'createOpportunity',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) => slideTransitionPage(
+          key: state.pageKey,
+          child: const CreateOpportunityScreen(),
+        ),
+      ),
+      GoRoute(
+        path: RouteNames.editOpportunity,
+        name: 'editOpportunity',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return slideTransitionPage(
+            key: state.pageKey,
+            child: EditOpportunityScreen(opportunityId: id),
+          );
+        },
+      ),
+      GoRoute(
+        path: RouteNames.startupApplicants,
+        name: 'startupApplicants',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final opportunityId = state.extra as String?;
+          return slideTransitionPage(
+            key: state.pageKey,
+            child: StartupApplicantsScreen(
+              initialOpportunityId: opportunityId,
+            ),
+          );
+        },
+      ),
     ],
   );
 });
@@ -219,6 +267,7 @@ String? _redirect(Ref ref, GoRouterState state) {
       location != RouteNames.emailVerification &&
       !shellRoutes.contains(location) &&
       !location.startsWith('/opportunities/') &&
+      !location.startsWith('/startup/') &&
       location != RouteNames.editProfile) {
     return RouteNames.login;
   }

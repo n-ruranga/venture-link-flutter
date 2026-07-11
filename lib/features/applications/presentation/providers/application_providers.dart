@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venture_link/core/constants/application_strings.dart';
-import 'package:venture_link/core/constants/user_roles.dart';
 import 'package:venture_link/core/utils/firebase_auth_exception_mapper.dart';
 import 'package:venture_link/features/applications/domain/entities/application_entity.dart';
 import 'package:venture_link/features/applications/domain/entities/application_status.dart';
@@ -8,6 +7,7 @@ import 'package:venture_link/features/applications/presentation/providers/applic
 import 'package:venture_link/features/opportunities/domain/entities/opportunity_entity.dart';
 import 'package:venture_link/features/opportunities/presentation/providers/opportunity_providers.dart';
 import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
+import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
 
 final studentApplicationsStreamProvider =
     StreamProvider<ApplicationsSnapshot>((ref) {
@@ -30,6 +30,10 @@ final availableStartupIdsProvider = Provider<List<String>>((ref) {
 });
 
 final effectiveStartupIdProvider = Provider<String?>((ref) {
+  final currentStartup = ref.watch(currentStartupIdProvider);
+  if (currentStartup != null) {
+    return currentStartup;
+  }
   final selected = ref.watch(selectedStartupIdProvider);
   if (selected != null) {
     return selected;
@@ -126,11 +130,6 @@ final isStudentApplicationsOfflineProvider = Provider<bool>((ref) {
         data: (data) => data.isFromCache,
         orElse: () => false,
       );
-});
-
-final isStartupUserProvider = Provider<bool>((ref) {
-  final profile = ref.watch(userProfileStreamProvider).value;
-  return profile?.role == UserRoles.startup;
 });
 
 final applyActionProvider =

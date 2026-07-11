@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserModel {
 
- String get uid; String get fullName; String get email; String get role; String? get profilePicture; String? get degree; String? get year; List<String> get skills; List<String> get interests; String? get bio;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt; String? get resumeUrl; String? get github; String? get linkedin; String? get portfolio; bool get isProfileComplete; bool get isEmailVerified;
+ String get uid; String get fullName; String get email; String get role; String? get profilePicture; String? get degree; String? get year; List<String> get skills; List<String> get interests; String? get bio;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt; String? get resumeUrl; String? get github; String? get linkedin; String? get portfolio; bool get isProfileComplete; bool get isEmailVerified; bool get isVerified;
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $UserModelCopyWith<UserModel> get copyWith => _$UserModelCopyWithImpl<UserModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.degree, degree) || other.degree == degree)&&(identical(other.year, year) || other.year == year)&&const DeepCollectionEquality().equals(other.skills, skills)&&const DeepCollectionEquality().equals(other.interests, interests)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.resumeUrl, resumeUrl) || other.resumeUrl == resumeUrl)&&(identical(other.github, github) || other.github == github)&&(identical(other.linkedin, linkedin) || other.linkedin == linkedin)&&(identical(other.portfolio, portfolio) || other.portfolio == portfolio)&&(identical(other.isProfileComplete, isProfileComplete) || other.isProfileComplete == isProfileComplete)&&(identical(other.isEmailVerified, isEmailVerified) || other.isEmailVerified == isEmailVerified));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.degree, degree) || other.degree == degree)&&(identical(other.year, year) || other.year == year)&&const DeepCollectionEquality().equals(other.skills, skills)&&const DeepCollectionEquality().equals(other.interests, interests)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.resumeUrl, resumeUrl) || other.resumeUrl == resumeUrl)&&(identical(other.github, github) || other.github == github)&&(identical(other.linkedin, linkedin) || other.linkedin == linkedin)&&(identical(other.portfolio, portfolio) || other.portfolio == portfolio)&&(identical(other.isProfileComplete, isProfileComplete) || other.isProfileComplete == isProfileComplete)&&(identical(other.isEmailVerified, isEmailVerified) || other.isEmailVerified == isEmailVerified)&&(identical(other.isVerified, isVerified) || other.isVerified == isVerified));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,uid,fullName,email,role,profilePicture,degree,year,const DeepCollectionEquality().hash(skills),const DeepCollectionEquality().hash(interests),bio,createdAt,updatedAt,resumeUrl,github,linkedin,portfolio,isProfileComplete,isEmailVerified);
+int get hashCode => Object.hashAll([runtimeType,uid,fullName,email,role,profilePicture,degree,year,const DeepCollectionEquality().hash(skills),const DeepCollectionEquality().hash(interests),bio,createdAt,updatedAt,resumeUrl,github,linkedin,portfolio,isProfileComplete,isEmailVerified,isVerified]);
 
 @override
 String toString() {
-  return 'UserModel(uid: $uid, fullName: $fullName, email: $email, role: $role, profilePicture: $profilePicture, degree: $degree, year: $year, skills: $skills, interests: $interests, bio: $bio, createdAt: $createdAt, updatedAt: $updatedAt, resumeUrl: $resumeUrl, github: $github, linkedin: $linkedin, portfolio: $portfolio, isProfileComplete: $isProfileComplete, isEmailVerified: $isEmailVerified)';
+  return 'UserModel(uid: $uid, fullName: $fullName, email: $email, role: $role, profilePicture: $profilePicture, degree: $degree, year: $year, skills: $skills, interests: $interests, bio: $bio, createdAt: $createdAt, updatedAt: $updatedAt, resumeUrl: $resumeUrl, github: $github, linkedin: $linkedin, portfolio: $portfolio, isProfileComplete: $isProfileComplete, isEmailVerified: $isEmailVerified, isVerified: $isVerified)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $UserModelCopyWith<$Res>  {
   factory $UserModelCopyWith(UserModel value, $Res Function(UserModel) _then) = _$UserModelCopyWithImpl;
 @useResult
 $Res call({
- String uid, String fullName, String email, String role, String? profilePicture, String? degree, String? year, List<String> skills, List<String> interests, String? bio,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt, String? resumeUrl, String? github, String? linkedin, String? portfolio, bool isProfileComplete, bool isEmailVerified
+ String uid, String fullName, String email, String role, String? profilePicture, String? degree, String? year, List<String> skills, List<String> interests, String? bio,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt, String? resumeUrl, String? github, String? linkedin, String? portfolio, bool isProfileComplete, bool isEmailVerified, bool isVerified
 });
 
 
@@ -65,7 +65,7 @@ class _$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? fullName = null,Object? email = null,Object? role = null,Object? profilePicture = freezed,Object? degree = freezed,Object? year = freezed,Object? skills = null,Object? interests = null,Object? bio = freezed,Object? createdAt = null,Object? updatedAt = null,Object? resumeUrl = freezed,Object? github = freezed,Object? linkedin = freezed,Object? portfolio = freezed,Object? isProfileComplete = null,Object? isEmailVerified = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? fullName = null,Object? email = null,Object? role = null,Object? profilePicture = freezed,Object? degree = freezed,Object? year = freezed,Object? skills = null,Object? interests = null,Object? bio = freezed,Object? createdAt = null,Object? updatedAt = null,Object? resumeUrl = freezed,Object? github = freezed,Object? linkedin = freezed,Object? portfolio = freezed,Object? isProfileComplete = null,Object? isEmailVerified = null,Object? isVerified = null,}) {
   return _then(_self.copyWith(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
@@ -85,6 +85,7 @@ as String?,linkedin: freezed == linkedin ? _self.linkedin : linkedin // ignore: 
 as String?,portfolio: freezed == portfolio ? _self.portfolio : portfolio // ignore: cast_nullable_to_non_nullable
 as String?,isProfileComplete: null == isProfileComplete ? _self.isProfileComplete : isProfileComplete // ignore: cast_nullable_to_non_nullable
 as bool,isEmailVerified: null == isEmailVerified ? _self.isEmailVerified : isEmailVerified // ignore: cast_nullable_to_non_nullable
+as bool,isVerified: null == isVerified ? _self.isVerified : isVerified // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -170,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String fullName,  String email,  String role,  String? profilePicture,  String? degree,  String? year,  List<String> skills,  List<String> interests,  String? bio, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt,  String? resumeUrl,  String? github,  String? linkedin,  String? portfolio,  bool isProfileComplete,  bool isEmailVerified)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String fullName,  String email,  String role,  String? profilePicture,  String? degree,  String? year,  List<String> skills,  List<String> interests,  String? bio, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt,  String? resumeUrl,  String? github,  String? linkedin,  String? portfolio,  bool isProfileComplete,  bool isEmailVerified,  bool isVerified)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
-return $default(_that.uid,_that.fullName,_that.email,_that.role,_that.profilePicture,_that.degree,_that.year,_that.skills,_that.interests,_that.bio,_that.createdAt,_that.updatedAt,_that.resumeUrl,_that.github,_that.linkedin,_that.portfolio,_that.isProfileComplete,_that.isEmailVerified);case _:
+return $default(_that.uid,_that.fullName,_that.email,_that.role,_that.profilePicture,_that.degree,_that.year,_that.skills,_that.interests,_that.bio,_that.createdAt,_that.updatedAt,_that.resumeUrl,_that.github,_that.linkedin,_that.portfolio,_that.isProfileComplete,_that.isEmailVerified,_that.isVerified);case _:
   return orElse();
 
 }
@@ -191,10 +192,10 @@ return $default(_that.uid,_that.fullName,_that.email,_that.role,_that.profilePic
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String fullName,  String email,  String role,  String? profilePicture,  String? degree,  String? year,  List<String> skills,  List<String> interests,  String? bio, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt,  String? resumeUrl,  String? github,  String? linkedin,  String? portfolio,  bool isProfileComplete,  bool isEmailVerified)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String fullName,  String email,  String role,  String? profilePicture,  String? degree,  String? year,  List<String> skills,  List<String> interests,  String? bio, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt,  String? resumeUrl,  String? github,  String? linkedin,  String? portfolio,  bool isProfileComplete,  bool isEmailVerified,  bool isVerified)  $default,) {final _that = this;
 switch (_that) {
 case _UserModel():
-return $default(_that.uid,_that.fullName,_that.email,_that.role,_that.profilePicture,_that.degree,_that.year,_that.skills,_that.interests,_that.bio,_that.createdAt,_that.updatedAt,_that.resumeUrl,_that.github,_that.linkedin,_that.portfolio,_that.isProfileComplete,_that.isEmailVerified);case _:
+return $default(_that.uid,_that.fullName,_that.email,_that.role,_that.profilePicture,_that.degree,_that.year,_that.skills,_that.interests,_that.bio,_that.createdAt,_that.updatedAt,_that.resumeUrl,_that.github,_that.linkedin,_that.portfolio,_that.isProfileComplete,_that.isEmailVerified,_that.isVerified);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +212,10 @@ return $default(_that.uid,_that.fullName,_that.email,_that.role,_that.profilePic
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String fullName,  String email,  String role,  String? profilePicture,  String? degree,  String? year,  List<String> skills,  List<String> interests,  String? bio, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt,  String? resumeUrl,  String? github,  String? linkedin,  String? portfolio,  bool isProfileComplete,  bool isEmailVerified)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String fullName,  String email,  String role,  String? profilePicture,  String? degree,  String? year,  List<String> skills,  List<String> interests,  String? bio, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt,  String? resumeUrl,  String? github,  String? linkedin,  String? portfolio,  bool isProfileComplete,  bool isEmailVerified,  bool isVerified)?  $default,) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
-return $default(_that.uid,_that.fullName,_that.email,_that.role,_that.profilePicture,_that.degree,_that.year,_that.skills,_that.interests,_that.bio,_that.createdAt,_that.updatedAt,_that.resumeUrl,_that.github,_that.linkedin,_that.portfolio,_that.isProfileComplete,_that.isEmailVerified);case _:
+return $default(_that.uid,_that.fullName,_that.email,_that.role,_that.profilePicture,_that.degree,_that.year,_that.skills,_that.interests,_that.bio,_that.createdAt,_that.updatedAt,_that.resumeUrl,_that.github,_that.linkedin,_that.portfolio,_that.isProfileComplete,_that.isEmailVerified,_that.isVerified);case _:
   return null;
 
 }
@@ -226,7 +227,7 @@ return $default(_that.uid,_that.fullName,_that.email,_that.role,_that.profilePic
 @JsonSerializable()
 
 class _UserModel extends UserModel {
-  const _UserModel({required this.uid, required this.fullName, required this.email, this.role = UserRoles.student, this.profilePicture, this.degree, this.year, final  List<String> skills = const [], final  List<String> interests = const [], this.bio, @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt, this.resumeUrl, this.github, this.linkedin, this.portfolio, this.isProfileComplete = false, this.isEmailVerified = false}): _skills = skills,_interests = interests,super._();
+  const _UserModel({required this.uid, required this.fullName, required this.email, this.role = UserRoles.student, this.profilePicture, this.degree, this.year, final  List<String> skills = const [], final  List<String> interests = const [], this.bio, @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt, this.resumeUrl, this.github, this.linkedin, this.portfolio, this.isProfileComplete = false, this.isEmailVerified = false, this.isVerified = false}): _skills = skills,_interests = interests,super._();
   factory _UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
 @override final  String uid;
@@ -259,6 +260,7 @@ class _UserModel extends UserModel {
 @override final  String? portfolio;
 @override@JsonKey() final  bool isProfileComplete;
 @override@JsonKey() final  bool isEmailVerified;
+@override@JsonKey() final  bool isVerified;
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
@@ -273,16 +275,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.degree, degree) || other.degree == degree)&&(identical(other.year, year) || other.year == year)&&const DeepCollectionEquality().equals(other._skills, _skills)&&const DeepCollectionEquality().equals(other._interests, _interests)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.resumeUrl, resumeUrl) || other.resumeUrl == resumeUrl)&&(identical(other.github, github) || other.github == github)&&(identical(other.linkedin, linkedin) || other.linkedin == linkedin)&&(identical(other.portfolio, portfolio) || other.portfolio == portfolio)&&(identical(other.isProfileComplete, isProfileComplete) || other.isProfileComplete == isProfileComplete)&&(identical(other.isEmailVerified, isEmailVerified) || other.isEmailVerified == isEmailVerified));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.degree, degree) || other.degree == degree)&&(identical(other.year, year) || other.year == year)&&const DeepCollectionEquality().equals(other._skills, _skills)&&const DeepCollectionEquality().equals(other._interests, _interests)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.resumeUrl, resumeUrl) || other.resumeUrl == resumeUrl)&&(identical(other.github, github) || other.github == github)&&(identical(other.linkedin, linkedin) || other.linkedin == linkedin)&&(identical(other.portfolio, portfolio) || other.portfolio == portfolio)&&(identical(other.isProfileComplete, isProfileComplete) || other.isProfileComplete == isProfileComplete)&&(identical(other.isEmailVerified, isEmailVerified) || other.isEmailVerified == isEmailVerified)&&(identical(other.isVerified, isVerified) || other.isVerified == isVerified));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,uid,fullName,email,role,profilePicture,degree,year,const DeepCollectionEquality().hash(_skills),const DeepCollectionEquality().hash(_interests),bio,createdAt,updatedAt,resumeUrl,github,linkedin,portfolio,isProfileComplete,isEmailVerified);
+int get hashCode => Object.hashAll([runtimeType,uid,fullName,email,role,profilePicture,degree,year,const DeepCollectionEquality().hash(_skills),const DeepCollectionEquality().hash(_interests),bio,createdAt,updatedAt,resumeUrl,github,linkedin,portfolio,isProfileComplete,isEmailVerified,isVerified]);
 
 @override
 String toString() {
-  return 'UserModel(uid: $uid, fullName: $fullName, email: $email, role: $role, profilePicture: $profilePicture, degree: $degree, year: $year, skills: $skills, interests: $interests, bio: $bio, createdAt: $createdAt, updatedAt: $updatedAt, resumeUrl: $resumeUrl, github: $github, linkedin: $linkedin, portfolio: $portfolio, isProfileComplete: $isProfileComplete, isEmailVerified: $isEmailVerified)';
+  return 'UserModel(uid: $uid, fullName: $fullName, email: $email, role: $role, profilePicture: $profilePicture, degree: $degree, year: $year, skills: $skills, interests: $interests, bio: $bio, createdAt: $createdAt, updatedAt: $updatedAt, resumeUrl: $resumeUrl, github: $github, linkedin: $linkedin, portfolio: $portfolio, isProfileComplete: $isProfileComplete, isEmailVerified: $isEmailVerified, isVerified: $isVerified)';
 }
 
 
@@ -293,7 +295,7 @@ abstract mixin class _$UserModelCopyWith<$Res> implements $UserModelCopyWith<$Re
   factory _$UserModelCopyWith(_UserModel value, $Res Function(_UserModel) _then) = __$UserModelCopyWithImpl;
 @override @useResult
 $Res call({
- String uid, String fullName, String email, String role, String? profilePicture, String? degree, String? year, List<String> skills, List<String> interests, String? bio,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt, String? resumeUrl, String? github, String? linkedin, String? portfolio, bool isProfileComplete, bool isEmailVerified
+ String uid, String fullName, String email, String role, String? profilePicture, String? degree, String? year, List<String> skills, List<String> interests, String? bio,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt, String? resumeUrl, String? github, String? linkedin, String? portfolio, bool isProfileComplete, bool isEmailVerified, bool isVerified
 });
 
 
@@ -310,7 +312,7 @@ class __$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? fullName = null,Object? email = null,Object? role = null,Object? profilePicture = freezed,Object? degree = freezed,Object? year = freezed,Object? skills = null,Object? interests = null,Object? bio = freezed,Object? createdAt = null,Object? updatedAt = null,Object? resumeUrl = freezed,Object? github = freezed,Object? linkedin = freezed,Object? portfolio = freezed,Object? isProfileComplete = null,Object? isEmailVerified = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? fullName = null,Object? email = null,Object? role = null,Object? profilePicture = freezed,Object? degree = freezed,Object? year = freezed,Object? skills = null,Object? interests = null,Object? bio = freezed,Object? createdAt = null,Object? updatedAt = null,Object? resumeUrl = freezed,Object? github = freezed,Object? linkedin = freezed,Object? portfolio = freezed,Object? isProfileComplete = null,Object? isEmailVerified = null,Object? isVerified = null,}) {
   return _then(_UserModel(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
@@ -330,6 +332,7 @@ as String?,linkedin: freezed == linkedin ? _self.linkedin : linkedin // ignore: 
 as String?,portfolio: freezed == portfolio ? _self.portfolio : portfolio // ignore: cast_nullable_to_non_nullable
 as String?,isProfileComplete: null == isProfileComplete ? _self.isProfileComplete : isProfileComplete // ignore: cast_nullable_to_non_nullable
 as bool,isEmailVerified: null == isEmailVerified ? _self.isEmailVerified : isEmailVerified // ignore: cast_nullable_to_non_nullable
+as bool,isVerified: null == isVerified ? _self.isVerified : isVerified // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

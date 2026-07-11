@@ -29,6 +29,7 @@ abstract class UserModel with _$UserModel {
     String? portfolio,
     @Default(false) bool isProfileComplete,
     @Default(false) bool isEmailVerified,
+    @Default(false) bool isVerified,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -74,6 +75,7 @@ abstract class UserModel with _$UserModel {
       portfolio: portfolio,
       isProfileComplete: isProfileComplete,
       isEmailVerified: isEmailVerified,
+      isVerified: isVerified,
     );
   }
 
@@ -97,6 +99,7 @@ abstract class UserModel with _$UserModel {
       portfolio: entity.portfolio,
       isProfileComplete: entity.isProfileComplete,
       isEmailVerified: entity.isEmailVerified,
+      isVerified: entity.isVerified,
     );
   }
 

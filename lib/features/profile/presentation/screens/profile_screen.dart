@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/profile_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
+import 'package:venture_link/core/constants/startup_strings.dart';
 import 'package:venture_link/core/routes/route_names.dart';
+import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
 import 'package:venture_link/features/profile/domain/entities/user_profile_entity.dart';
 import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
 import 'package:venture_link/features/profile/presentation/widgets/profile_widgets.dart';
@@ -20,6 +22,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileStreamProvider);
+    final isStartup = ref.watch(isStartupUserProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -52,7 +55,7 @@ class ProfileScreen extends ConsumerWidget {
             );
           }
 
-          return _ProfileContent(profile: profile);
+          return _ProfileContent(profile: profile, isStartup: isStartup);
         },
       ),
     );
@@ -60,9 +63,13 @@ class ProfileScreen extends ConsumerWidget {
 }
 
 class _ProfileContent extends StatelessWidget {
-  const _ProfileContent({required this.profile});
+  const _ProfileContent({
+    required this.profile,
+    required this.isStartup,
+  });
 
   final UserProfileEntity profile;
+  final bool isStartup;
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +162,14 @@ class _ProfileContent extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
+          if (isStartup) ...[
+            PrimaryButton(
+              label: StartupStrings.dashboard,
+              icon: Icons.dashboard_outlined,
+              onPressed: () => context.push(RouteNames.startupDashboard),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
           PrimaryButton(
             label: ProfileStrings.editProfile,
             icon: Icons.edit_outlined,

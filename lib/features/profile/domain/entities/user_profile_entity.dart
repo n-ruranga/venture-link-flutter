@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:venture_link/core/constants/user_roles.dart';
 
 class UserProfileEntity extends Equatable {
   const UserProfileEntity({
@@ -20,6 +21,7 @@ class UserProfileEntity extends Equatable {
     this.portfolio,
     this.isProfileComplete = false,
     this.isEmailVerified = false,
+    this.isVerified = false,
   });
 
   final String uid;
@@ -40,6 +42,9 @@ class UserProfileEntity extends Equatable {
   final String? portfolio;
   final bool isProfileComplete;
   final bool isEmailVerified;
+  final bool isVerified;
+
+  bool get isStartup => role == UserRoles.startup;
 
   int get completionPercentage {
     final fields = [
@@ -75,6 +80,7 @@ class UserProfileEntity extends Equatable {
     String? portfolio,
     bool? isProfileComplete,
     bool? isEmailVerified,
+    bool? isVerified,
   }) {
     return UserProfileEntity(
       uid: uid ?? this.uid,
@@ -95,6 +101,7 @@ class UserProfileEntity extends Equatable {
       portfolio: portfolio ?? this.portfolio,
       isProfileComplete: isProfileComplete ?? this.isProfileComplete,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+      isVerified: isVerified ?? this.isVerified,
     );
   }
 
@@ -118,5 +125,6 @@ class UserProfileEntity extends Equatable {
         portfolio,
         isProfileComplete,
         isEmailVerified,
+        isVerified,
       ];
 }

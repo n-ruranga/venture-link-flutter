@@ -1,0 +1,81 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isStartup() {
+      return isSignedIn() && userDoc().role == 'startup';
+    }
+
+    function isVerifiedStartup() {
+      return isStartup() && userDoc().isVerified == true;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && userDoc().role == 'admin';
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (
+        request.auth.uid == userId ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+
+      match /saved/{opportunityId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+
+    match /opportunities/{opportunityId} {
+      allow read: if true;
+
+      allow create: if isVerifiedStartup()
+        && request.resource.data.startupId == request.auth.uid
+        && request.resource.data.isVerified == true
+        && request.resource.data.status == 'active';
+
+      allow update: if isSignedIn() && (
+        (isStartup()
+          && resource.data.startupId == request.auth.uid
+          && request.resource.data.startupId == request.auth.uid) ||
+        isAdmin()
+      );
+
+      allow delete: if false;
+    }
+
+    match /applications/{applicationId} {
+      allow read: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        (isStartup() && resource.data.startupId == request.auth.uid) ||
+        isAdmin()
+      );
+
+      allow create: if isSignedIn()
+        && request.resource.data.studentId == request.auth.uid
+        && request.resource.data.status == 'applied';
+
+      allow update: if isSignedIn() && (
+        (isStartup()
+          && resource.data.startupId == request.auth.uid
+          && request.resource.data.startupId == resource.data.startupId
+          && request.resource.data.studentId == resource.data.studentId) ||
+        isAdmin()
+      );
+
+      allow delete: if isSignedIn()
+        && resource.data.studentId == request.auth.uid
+        && resource.data.status == 'applied';
+    }
+  }
+}
