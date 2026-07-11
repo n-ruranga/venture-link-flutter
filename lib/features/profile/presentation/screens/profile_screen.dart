@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/profile_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
+import 'package:venture_link/core/constants/strings.dart';
 import 'package:venture_link/core/constants/startup_strings.dart';
 import 'package:venture_link/core/routes/route_names.dart';
 import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
@@ -43,7 +44,7 @@ class ProfileScreen extends ConsumerWidget {
       body: profileAsync.when(
         loading: () => const LoadingIndicator(),
         error: (error, _) => ErrorStateWidget(
-          message: error.toString(),
+          message: AppStrings.genericError,
           onRetry: () => ref.invalidate(userProfileStreamProvider),
         ),
         data: (profile) {

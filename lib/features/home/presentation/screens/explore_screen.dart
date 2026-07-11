@@ -7,8 +7,10 @@ import 'package:venture_link/core/constants/spacing.dart';
 import 'package:venture_link/features/home/presentation/widgets/category_grid.dart';
 import 'package:venture_link/features/home/presentation/widgets/home_header_widgets.dart';
 import 'package:venture_link/features/home/presentation/widgets/opportunity_list_card.dart';
+import 'package:venture_link/features/opportunities/domain/entities/opportunity_filter_scope.dart';
 import 'package:venture_link/features/opportunities/presentation/providers/opportunity_providers.dart';
 import 'package:venture_link/features/opportunities/presentation/widgets/opportunity_state_widgets.dart';
+import 'package:venture_link/shared/widgets/empty_state_widget.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
 
@@ -20,6 +22,8 @@ class ExploreScreen extends ConsumerStatefulWidget {
 }
 
 class _ExploreScreenState extends ConsumerState<ExploreScreen> {
+  static const _filterScope = OpportunityFilterScope.explore;
+
   late final TextEditingController _searchController;
 
   @override
@@ -37,10 +41,10 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   @override
   Widget build(BuildContext context) {
     final opportunitiesAsync = ref.watch(opportunitiesStreamProvider);
-    final results = ref.watch(exploreFilteredOpportunitiesProvider);
+    final results = ref.watch(filteredOpportunitiesProvider(_filterScope));
     final categories = ref.watch(opportunityCategoriesProvider);
-    final selectedCategory = ref.watch(selectedCategoryProvider);
-    final bookmarksOnly = ref.watch(showBookmarksOnlyProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider(_filterScope));
+    final bookmarksOnly = ref.watch(showBookmarksOnlyProvider(_filterScope));
     final bookmarkedIds = ref.watch(bookmarkedIdsStreamProvider).value ?? {};
 
     return Scaffold(
@@ -79,8 +83,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                     HomeSearchSection(
                       controller: _searchController,
                       onChanged: (value) {
-                        ref.read(exploreSearchQueryProvider.notifier).state =
-                            value;
+                        ref
+                            .read(searchQueryProvider(_filterScope).notifier)
+                            .state = value;
                       },
                     ),
                     const SizedBox(height: AppSpacing.md),
@@ -92,16 +97,24 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           label: Text(OpportunityStrings.saved),
                           selected: bookmarksOnly,
                           onSelected: (selected) {
-                            ref.read(showBookmarksOnlyProvider.notifier).state =
-                                selected;
+                            ref
+                                .read(
+                                  showBookmarksOnlyProvider(_filterScope)
+                                      .notifier,
+                                )
+                                .state = selected;
                           },
                         ),
                         if (selectedCategory != null)
                           InputChip(
                             label: Text(selectedCategory.label),
                             onDeleted: () {
-                              ref.read(selectedCategoryProvider.notifier).state =
-                                  null;
+                              ref
+                                  .read(
+                                    selectedCategoryProvider(_filterScope)
+                                        .notifier,
+                                  )
+                                  .state = null;
                             },
                           ),
                       ],
@@ -111,8 +124,11 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                       categories: categories,
                       selectedCategory: selectedCategory,
                       onCategorySelected: (category) {
-                        ref.read(selectedCategoryProvider.notifier).state =
-                            category;
+                        ref
+                            .read(
+                              selectedCategoryProvider(_filterScope).notifier,
+                            )
+                            .state = category;
                       },
                     ),
                   ],
@@ -120,18 +136,13 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               ),
               Expanded(
                 child: results.isEmpty
-                    ? Center(
-                        child: Text(
-                          bookmarksOnly
-                              ? OpportunityStrings.emptyBookmarks
-                              : snapshot.opportunities.isEmpty
-                                  ? OpportunityStrings.emptyOpportunities
-                                  : OpportunityStrings.emptySearch,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                        ),
+                    ? EmptyStateWidget(
+                        title: bookmarksOnly
+                            ? OpportunityStrings.emptyBookmarks
+                            : snapshot.opportunities.isEmpty
+                                ? OpportunityStrings.emptyOpportunities
+                                : HomeStrings.noResults,
+                        icon: Icons.search_off_rounded,
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(

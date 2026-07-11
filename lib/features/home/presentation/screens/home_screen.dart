@@ -11,10 +11,12 @@ import 'package:venture_link/features/home/presentation/widgets/category_grid.da
 import 'package:venture_link/features/home/presentation/widgets/home_header_widgets.dart';
 import 'package:venture_link/features/home/presentation/widgets/opportunity_list_card.dart';
 import 'package:venture_link/features/home/presentation/widgets/recommended_opportunity_card.dart';
-import 'package:venture_link/features/opportunities/presentation/providers/opportunity_providers.dart';
+import 'package:venture_link/features/opportunities/domain/entities/opportunity_filter_scope.dart';
 import 'package:venture_link/features/opportunities/presentation/widgets/opportunity_shared_widgets.dart';
 import 'package:venture_link/features/opportunities/presentation/widgets/opportunity_state_widgets.dart';
 import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
+import 'package:venture_link/features/opportunities/presentation/providers/opportunity_providers.dart';
+import 'package:venture_link/shared/widgets/empty_state_widget.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
 
@@ -26,6 +28,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  static const _filterScope = OpportunityFilterScope.home;
+
   late final TextEditingController _searchController;
 
   @override
@@ -46,16 +50,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final profileAsync = ref.watch(userProfileStreamProvider);
     final opportunitiesAsync = ref.watch(opportunitiesStreamProvider);
     final featured = ref.watch(featuredOpportunitiesProvider);
-    final recent = ref.watch(filteredOpportunitiesProvider);
+    final recent = ref.watch(filteredOpportunitiesProvider(_filterScope));
     final categories = ref.watch(opportunityCategoriesProvider);
-    final selectedCategory = ref.watch(selectedCategoryProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider(_filterScope));
     final bookmarkedIds = ref.watch(bookmarkedIdsStreamProvider).value ?? {};
-    final isOffline = ref.watch(isOpportunitiesOfflineProvider);
 
     return authAsync.when(
       loading: () => const Scaffold(body: LoadingIndicator()),
       error: (error, _) => Scaffold(
-        body: ErrorStateWidget(message: error.toString()),
+        body: ErrorStateWidget(message: OpportunityStrings.loadError),
       ),
       data: (authState) {
         if (!authState.isAuthenticated) {
@@ -80,7 +83,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               data: (snapshot) {
                 return CustomScrollView(
                   slivers: [
-                    if (snapshot.isOffline || isOffline)
+                    if (snapshot.isOffline)
                       const SliverToBoxAdapter(child: OfflineBanner()),
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(
@@ -99,8 +102,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           HomeSearchSection(
                             controller: _searchController,
                             onChanged: (value) {
-                              ref.read(homeSearchQueryProvider.notifier).state =
-                                  value;
+                              ref
+                                  .read(searchQueryProvider(_filterScope).notifier)
+                                  .state = value;
                             },
                           ),
                         ]),
@@ -173,7 +177,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               selectedCategory: selectedCategory,
                               onCategorySelected: (category) {
                                 ref
-                                    .read(selectedCategoryProvider.notifier)
+                                    .read(
+                                      selectedCategoryProvider(_filterScope)
+                                          .notifier,
+                                    )
                                     .state = category;
                               },
                             ),
@@ -198,17 +205,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     if (recent.isEmpty)
                       SliverFillRemaining(
                         hasScrollBody: false,
-                        child: Center(
-                          child: Text(
-                            snapshot.opportunities.isEmpty
-                                ? OpportunityStrings.emptyOpportunities
-                                : OpportunityStrings.emptySearch,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(color: AppColors.textSecondary),
-                          ),
+                        child: EmptyStateWidget(
+                          title: snapshot.opportunities.isEmpty
+                              ? OpportunityStrings.emptyOpportunities
+                              : HomeStrings.noResults,
+                          icon: Icons.search_off_rounded,
                         ),
                       )
                     else

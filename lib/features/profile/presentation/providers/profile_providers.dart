@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venture_link/core/utils/async_action_mapper.dart';
 import 'package:venture_link/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:venture_link/features/profile/domain/entities/user_profile_entity.dart';
 import 'package:venture_link/features/profile/presentation/providers/profile_repository_providers.dart';
@@ -29,10 +30,11 @@ class UpdateProfileNotifier extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  Future<void> updateProfile(UserProfileEntity profile) async {
+  Future<String?> updateProfile(UserProfileEntity profile) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(profileRepositoryProvider).updateProfile(profile);
     });
+    return mapAsyncActionError(state);
   }
 }

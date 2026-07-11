@@ -4,13 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/spacing.dart';
 import 'package:venture_link/core/constants/startup_strings.dart';
+import 'package:venture_link/core/utils/responsive_layout.dart';
 import 'package:venture_link/core/routes/route_names.dart';
 import 'package:venture_link/features/opportunities/presentation/widgets/opportunity_state_widgets.dart';
 import 'package:venture_link/features/applications/presentation/providers/application_providers.dart';
 import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
 import 'package:venture_link/features/startup/presentation/widgets/dashboard_stat_card.dart';
 import 'package:venture_link/features/startup/presentation/widgets/startup_opportunity_tile.dart';
-import 'package:venture_link/shared/extensions/context_extensions.dart';
+import 'package:venture_link/shared/utils/action_result_handler.dart';
+import 'package:venture_link/shared/widgets/empty_state_widget.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
 
@@ -71,15 +73,18 @@ class StartupDashboardScreen extends ConsumerWidget {
                         _VerificationBanner(),
                       ],
                       const SizedBox(height: AppSpacing.lg),
-                      SizedBox(
-                        height: 120,
-                        child: GridView.count(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: AppSpacing.md,
-                          mainAxisSpacing: AppSpacing.md,
-                          physics: const NeverScrollableScrollPhysics(),
-                          childAspectRatio: 1.6,
-                          children: [
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final crossAxisCount =
+                              ResponsiveLayout.gridCrossAxisCount(context);
+                          return GridView.count(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            crossAxisCount: crossAxisCount,
+                            crossAxisSpacing: AppSpacing.md,
+                            mainAxisSpacing: AppSpacing.md,
+                            childAspectRatio: crossAxisCount > 2 ? 1.8 : 1.6,
+                            children: [
                             DashboardStatCard(
                               label: StartupStrings.activeOpportunities,
                               value: '${stats.activeOpportunities}',
@@ -107,7 +112,8 @@ class StartupDashboardScreen extends ConsumerWidget {
                               color: AppColors.error,
                             ),
                           ],
-                        ),
+                          );
+                        },
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       Row(
@@ -127,18 +133,9 @@ class StartupDashboardScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       if (opportunities.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.xl,
-                          ),
-                          child: Text(
-                            StartupStrings.emptyOpportunities,
-                            textAlign: TextAlign.center,
-                            style:
-                                Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                          ),
+                        const EmptyStateWidget(
+                          title: StartupStrings.emptyOpportunities,
+                          icon: Icons.work_outline_rounded,
                         )
                       else
                         ...opportunities.map((opportunity) {
@@ -201,20 +198,13 @@ class StartupDashboardScreen extends ConsumerWidget {
       return;
     }
 
-    final error = await ref
-        .read(deleteOpportunityActionProvider(opportunityId).notifier)
-        .delete();
-
-    if (!context.mounted) {
-      return;
-    }
-
-    if (error != null) {
-      context.showSnackBar(error, isError: true);
-      return;
-    }
-
-    context.showSnackBar(StartupStrings.deleteSuccess);
+    await handleActionResult(
+      context,
+      action: () => ref
+          .read(deleteOpportunityActionProvider(opportunityId).notifier)
+          .delete(),
+      successMessage: StartupStrings.deleteSuccess,
+    );
   }
 }
 

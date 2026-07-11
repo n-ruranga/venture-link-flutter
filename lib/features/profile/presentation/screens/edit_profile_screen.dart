@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venture_link/core/constants/profile_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
+import 'package:venture_link/core/constants/strings.dart';
 import 'package:venture_link/core/utils/validators.dart';
 import 'package:venture_link/features/profile/domain/entities/user_profile_entity.dart';
 import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
 import 'package:venture_link/features/profile/presentation/widgets/tag_editor.dart';
 import 'package:venture_link/shared/extensions/context_extensions.dart';
+import 'package:venture_link/shared/utils/action_result_handler.dart';
 import 'package:venture_link/shared/widgets/custom_text_field.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
@@ -125,22 +127,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       interests: _interests,
     );
 
-    await ref
-        .read(updateProfileActionProvider.notifier)
-        .updateProfile(updatedProfile);
-
-    if (!mounted) {
-      return;
-    }
-
-    final updateState = ref.read(updateProfileActionProvider);
-    if (updateState.hasError) {
-      context.showSnackBar(updateState.error.toString(), isError: true);
-      return;
-    }
-
-    context.showSnackBar(ProfileStrings.profileUpdated);
-    context.pop();
+    await handleActionResult(
+      context,
+      action: () => ref
+          .read(updateProfileActionProvider.notifier)
+          .updateProfile(updatedProfile),
+      successMessage: ProfileStrings.profileUpdated,
+      onSuccess: () => context.pop(),
+    );
   }
 
   @override
@@ -155,7 +149,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       ),
       body: profileAsync.when(
         loading: () => const LoadingIndicator(),
-        error: (error, _) => ErrorStateWidget(message: error.toString()),
+        error: (error, _) => ErrorStateWidget(
+          message: AppStrings.genericError,
+          onRetry: () => ref.invalidate(userProfileStreamProvider),
+        ),
         data: (profile) {
           if (profile == null) {
             return const ErrorStateWidget();

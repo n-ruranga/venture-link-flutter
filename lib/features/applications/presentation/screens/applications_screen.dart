@@ -6,11 +6,12 @@ import 'package:venture_link/core/constants/home_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
 import 'package:venture_link/features/applications/domain/entities/application_status.dart';
 import 'package:venture_link/features/applications/presentation/providers/application_providers.dart';
-import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
 import 'package:venture_link/features/applications/presentation/widgets/application_card.dart';
-import 'package:venture_link/features/startup/presentation/widgets/startup_applicants_list.dart';
 import 'package:venture_link/features/opportunities/presentation/widgets/opportunity_state_widgets.dart';
-import 'package:venture_link/shared/extensions/context_extensions.dart';
+import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
+import 'package:venture_link/features/startup/presentation/widgets/startup_applicants_list.dart';
+import 'package:venture_link/shared/utils/action_result_handler.dart';
+import 'package:venture_link/shared/widgets/empty_state_widget.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
 
@@ -36,8 +37,6 @@ class _StudentApplicationsView extends ConsumerWidget {
     final applications = ref.watch(enrichedStudentApplicationsProvider);
     final selectedFilter = ref.watch(selectedApplicationStatusFilterProvider);
     final isOffline = ref.watch(isStudentApplicationsOfflineProvider);
-    final withdrawingId = ref.watch(withdrawingApplicationIdProvider);
-    final withdrawState = ref.watch(withdrawActionProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -82,10 +81,11 @@ class _StudentApplicationsView extends ConsumerWidget {
               _StatusFilterBar(selectedFilter: selectedFilter),
               Expanded(
                 child: applications.isEmpty
-                    ? _EmptyApplicationsMessage(
-                        message: selectedFilter == null
+                    ? EmptyStateWidget(
+                        title: selectedFilter == null
                             ? ApplicationStrings.emptyApplications
                             : ApplicationStrings.emptyFiltered,
+                        icon: Icons.inbox_outlined,
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -94,17 +94,25 @@ class _StudentApplicationsView extends ConsumerWidget {
                             const SizedBox(height: AppSpacing.md),
                         itemBuilder: (context, index) {
                           final application = applications[index];
-                          final isWithdrawing = withdrawState.isLoading &&
-                              withdrawingId == application.id;
+                          final isWithdrawing = ref
+                              .watch(withdrawActionProvider(application.id))
+                              .isLoading;
 
                           return ApplicationCard(
                             application: application,
                             isWithdrawing: isWithdrawing,
                             onWithdraw: application.status.canWithdraw
-                                ? () => _withdraw(
+                                ? () => handleActionResult(
                                       context,
-                                      ref,
-                                      application.id,
+                                      action: () => ref
+                                          .read(
+                                            withdrawActionProvider(
+                                              application.id,
+                                            ).notifier,
+                                          )
+                                          .withdraw(),
+                                      successMessage:
+                                          ApplicationStrings.withdrawSuccess,
                                     )
                                 : null,
                           );
@@ -116,32 +124,6 @@ class _StudentApplicationsView extends ConsumerWidget {
         },
       ),
     );
-  }
-
-  Future<void> _withdraw(
-    BuildContext context,
-    WidgetRef ref,
-    String applicationId,
-  ) async {
-    ref.read(withdrawingApplicationIdProvider.notifier).state =
-        applicationId;
-
-    final error = await ref
-        .read(withdrawActionProvider.notifier)
-        .withdraw(applicationId);
-
-    ref.read(withdrawingApplicationIdProvider.notifier).state = null;
-
-    if (!context.mounted) {
-      return;
-    }
-
-    if (error != null) {
-      context.showSnackBar(error, isError: true);
-      return;
-    }
-
-    context.showSnackBar(ApplicationStrings.withdrawSuccess);
   }
 }
 
@@ -236,37 +218,20 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(
-        label,
-        style: labelColor != null
-            ? TextStyle(color: isSelected ? labelColor : null)
-            : null,
-      ),
+    return Semantics(
+      label: label,
       selected: isSelected,
-      selectedColor: selectedColor,
-      onSelected: (_) => onSelected(),
-    );
-  }
-}
-
-class _EmptyApplicationsMessage extends StatelessWidget {
-  const _EmptyApplicationsMessage({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+      button: true,
+      child: FilterChip(
+        label: Text(
+          label,
+          style: labelColor != null
+              ? TextStyle(color: isSelected ? labelColor : null)
+              : null,
         ),
+        selected: isSelected,
+        selectedColor: selectedColor,
+        onSelected: (_) => onSelected(),
       ),
     );
   }

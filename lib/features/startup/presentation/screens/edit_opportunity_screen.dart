@@ -7,7 +7,7 @@ import 'package:venture_link/features/opportunities/presentation/providers/oppor
 import 'package:venture_link/features/startup/domain/entities/opportunity_input.dart';
 import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
 import 'package:venture_link/features/startup/presentation/widgets/opportunity_form.dart';
-import 'package:venture_link/shared/extensions/context_extensions.dart';
+import 'package:venture_link/shared/utils/action_result_handler.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
 
@@ -67,20 +67,13 @@ class _EditOpportunityScreenState extends ConsumerState<EditOpportunityScreen> {
   }
 
   Future<void> _submit(OpportunityInput input) async {
-    final error = await ref
-        .read(updateOpportunityActionProvider(widget.opportunityId).notifier)
-        .submit(input);
-
-    if (!mounted) {
-      return;
-    }
-
-    if (error != null) {
-      context.showSnackBar(error, isError: true);
-      return;
-    }
-
-    context.showSnackBar(StartupStrings.updateSuccess);
-    context.pop();
+    await handleActionResult(
+      context,
+      action: () => ref
+          .read(updateOpportunityActionProvider(widget.opportunityId).notifier)
+          .submit(input),
+      successMessage: StartupStrings.updateSuccess,
+      onSuccess: () => context.pop(),
+    );
   }
 }

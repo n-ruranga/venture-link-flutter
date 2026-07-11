@@ -3,11 +3,14 @@ import 'package:intl/intl.dart';
 import 'package:venture_link/core/constants/spacing.dart';
 import 'package:venture_link/core/constants/startup_strings.dart';
 import 'package:venture_link/core/utils/validators.dart';
+import 'package:venture_link/core/utils/tag_list_utils.dart';
 import 'package:venture_link/features/opportunities/domain/entities/opportunity_category.dart';
 import 'package:venture_link/features/opportunities/domain/entities/opportunity_entity.dart';
 import 'package:venture_link/features/profile/presentation/widgets/tag_editor.dart';
 import 'package:venture_link/features/startup/domain/entities/opportunity_input.dart';
+import 'package:venture_link/shared/extensions/context_extensions.dart';
 import 'package:venture_link/shared/widgets/custom_text_field.dart';
+import 'package:venture_link/shared/widgets/primary_button.dart';
 
 class OpportunityForm extends StatefulWidget {
   const OpportunityForm({
@@ -102,25 +105,15 @@ class _OpportunityFormState extends State<OpportunityForm> {
   }
 
   void _addSkill() {
-    final skill = _skillController.text.trim();
-    if (skill.isEmpty) {
-      return;
-    }
-    if (_skills.contains(skill)) {
-      _skillController.clear();
-      return;
-    }
     setState(() {
-      _skills = [..._skills, skill];
+      _skills = TagListUtils.addUnique(_skills, _skillController.text);
       _skillController.clear();
     });
   }
 
   Future<void> _handleSubmit() async {
     if (_skills.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(StartupStrings.skillsRequired)),
-      );
+      context.showSnackBar(StartupStrings.skillsRequired, isError: true);
       return;
     }
 
@@ -144,8 +137,6 @@ class _OpportunityFormState extends State<OpportunityForm> {
 
   @override
   Widget build(BuildContext context) {
-    _populateFromInitial();
-
     return Form(
       key: widget.formKey,
       child: Column(
@@ -238,20 +229,15 @@ class _OpportunityFormState extends State<OpportunityForm> {
             onAdd: _addSkill,
             onRemove: (skill) {
               setState(() {
-                _skills = _skills.where((item) => item != skill).toList();
+                _skills = TagListUtils.remove(_skills, skill);
               });
             },
           ),
           const SizedBox(height: AppSpacing.xl),
-          FilledButton(
+          PrimaryButton(
+            label: widget.submitLabel,
+            isLoading: widget.isSubmitting,
             onPressed: widget.isSubmitting ? null : _handleSubmit,
-            child: widget.isSubmitting
-                ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(widget.submitLabel),
           ),
         ],
       ),

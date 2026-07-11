@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venture_link/core/constants/application_strings.dart';
-import 'package:venture_link/core/utils/firebase_auth_exception_mapper.dart';
+import 'package:venture_link/core/providers/user_context_providers.dart';
+import 'package:venture_link/core/utils/async_action_mapper.dart';
 import 'package:venture_link/features/applications/domain/entities/application_entity.dart';
 import 'package:venture_link/features/applications/domain/entities/application_status.dart';
 import 'package:venture_link/features/applications/presentation/providers/application_repository_providers.dart';
 import 'package:venture_link/features/opportunities/domain/entities/opportunity_entity.dart';
 import 'package:venture_link/features/opportunities/presentation/providers/opportunity_providers.dart';
 import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
-import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
 
 final studentApplicationsStreamProvider =
     StreamProvider<ApplicationsSnapshot>((ref) {
@@ -18,33 +18,9 @@ final studentApplicationsStreamProvider =
   return ref.watch(applicationRepositoryProvider).watchStudentApplications(userId);
 });
 
-final selectedStartupIdProvider = StateProvider<String?>((ref) => null);
-
-final withdrawingApplicationIdProvider = StateProvider<String?>((ref) => null);
-
-final updatingApplicationIdProvider = StateProvider<String?>((ref) => null);
-
-final availableStartupIdsProvider = Provider<List<String>>((ref) {
-  final opportunities = ref.watch(opportunitiesListProvider);
-  return opportunities.map((item) => item.startupId).toSet().toList()..sort();
-});
-
-final effectiveStartupIdProvider = Provider<String?>((ref) {
-  final currentStartup = ref.watch(currentStartupIdProvider);
-  if (currentStartup != null) {
-    return currentStartup;
-  }
-  final selected = ref.watch(selectedStartupIdProvider);
-  if (selected != null) {
-    return selected;
-  }
-  final ids = ref.watch(availableStartupIdsProvider);
-  return ids.isEmpty ? null : ids.first;
-});
-
 final startupApplicationsStreamProvider =
     StreamProvider<ApplicationsSnapshot>((ref) {
-  final startupId = ref.watch(effectiveStartupIdProvider);
+  final startupId = ref.watch(currentStartupIdProvider);
   if (startupId == null) {
     return Stream.value(const ApplicationsSnapshot(applications: []));
   }
@@ -77,7 +53,7 @@ final hasAppliedStreamProvider = Provider.family<bool, String>((ref, opportunity
 final selectedApplicationStatusFilterProvider =
     StateProvider<ApplicationStatus?>((ref) => null);
 
-List<ApplicationEntity> _enrichApplications(
+List<ApplicationEntity> enrichApplicationsWithOpportunities(
   List<ApplicationEntity> applications,
   List<OpportunityEntity> opportunities,
 ) {
@@ -103,7 +79,7 @@ final enrichedStudentApplicationsProvider =
   return snapshot.maybeWhen(
     data: (data) {
       var applications =
-          _enrichApplications(data.applications, opportunities);
+          enrichApplicationsWithOpportunities(data.applications, opportunities);
       if (filter != null) {
         applications =
             applications.where((item) => item.status == filter).toList();
@@ -120,7 +96,8 @@ final enrichedStartupApplicationsProvider =
   final opportunities = ref.watch(opportunitiesListProvider);
 
   return snapshot.maybeWhen(
-    data: (data) => _enrichApplications(data.applications, opportunities),
+    data: (data) =>
+        enrichApplicationsWithOpportunities(data.applications, opportunities),
     orElse: () => const [],
   );
 });
@@ -162,28 +139,20 @@ class ApplyActionNotifier extends FamilyAsyncNotifier<void, String> {
           );
     });
 
-    if (state.hasError) {
-      final error = state.error!;
-      if (error is StateError) {
-        return error.message;
-      }
-      return FirebaseAuthExceptionMapper.mapGeneric(error);
-    }
-
-    return null;
+    return mapAsyncActionError(state);
   }
 }
 
 final withdrawActionProvider =
-    AsyncNotifierProvider<WithdrawActionNotifier, void>(
+    AsyncNotifierProvider.family<WithdrawActionNotifier, void, String>(
   WithdrawActionNotifier.new,
 );
 
-class WithdrawActionNotifier extends AsyncNotifier<void> {
+class WithdrawActionNotifier extends FamilyAsyncNotifier<void, String> {
   @override
-  Future<void> build() async {}
+  Future<void> build(String arg) async {}
 
-  Future<String?> withdraw(String applicationId) async {
+  Future<String?> withdraw() async {
     final userId = ref.read(currentUserIdProvider);
     if (userId == null) {
       return ApplicationStrings.withdrawError;
@@ -192,48 +161,33 @@ class WithdrawActionNotifier extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(applicationRepositoryProvider).withdraw(
-            applicationId: applicationId,
+            applicationId: arg,
             studentId: userId,
           );
     });
 
-    if (state.hasError) {
-      final error = state.error!;
-      if (error is StateError) {
-        return error.message;
-      }
-      return FirebaseAuthExceptionMapper.mapGeneric(error);
-    }
-
-    return null;
+    return mapAsyncActionError(state);
   }
 }
 
 final updateApplicationStatusProvider =
-    AsyncNotifierProvider<UpdateApplicationStatusNotifier, void>(
+    AsyncNotifierProvider.family<UpdateApplicationStatusNotifier, void, String>(
   UpdateApplicationStatusNotifier.new,
 );
 
-class UpdateApplicationStatusNotifier extends AsyncNotifier<void> {
+class UpdateApplicationStatusNotifier extends FamilyAsyncNotifier<void, String> {
   @override
-  Future<void> build() async {}
+  Future<void> build(String arg) async {}
 
-  Future<String?> updateStatus({
-    required String applicationId,
-    required ApplicationStatus status,
-  }) async {
+  Future<String?> updateStatus(ApplicationStatus status) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(applicationRepositoryProvider).updateStatus(
-            applicationId: applicationId,
+            applicationId: arg,
             status: status,
           );
     });
 
-    if (state.hasError) {
-      return FirebaseAuthExceptionMapper.mapGeneric(state.error!);
-    }
-
-    return null;
+    return mapAsyncActionError(state);
   }
 }

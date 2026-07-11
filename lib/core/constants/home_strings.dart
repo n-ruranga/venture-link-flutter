@@ -15,6 +15,7 @@ abstract final class HomeStrings {
   static const String navHome = 'Home';
   static const String navExplore = 'Explore';
   static const String navApplications = 'Applications';
+  static const String navApplicants = 'Applicants';
   static const String navProfile = 'Profile';
 
   static const String exploreComingSoon =

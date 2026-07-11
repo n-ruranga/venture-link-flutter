@@ -1,33 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venture_link/core/constants/startup_strings.dart';
 import 'package:venture_link/core/constants/user_roles.dart';
-import 'package:venture_link/core/utils/firebase_auth_exception_mapper.dart';
+import 'package:venture_link/core/providers/user_context_providers.dart';
+import 'package:venture_link/core/utils/async_action_mapper.dart';
 import 'package:venture_link/features/applications/domain/entities/application_entity.dart';
 import 'package:venture_link/features/applications/domain/entities/application_status.dart';
 import 'package:venture_link/features/applications/presentation/providers/application_providers.dart';
 import 'package:venture_link/features/opportunities/domain/entities/opportunity_entity.dart';
 import 'package:venture_link/features/opportunities/presentation/providers/opportunity_repository_providers.dart';
-import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
 import 'package:venture_link/features/startup/domain/entities/opportunity_input.dart';
 import 'package:venture_link/features/startup/domain/entities/startup_dashboard_stats.dart';
 
-final currentStartupIdProvider = Provider<String?>((ref) {
-  final profile = ref.watch(userProfileStreamProvider).value;
-  if (profile?.role != UserRoles.startup) {
-    return null;
-  }
-  return profile!.uid;
-});
-
-final isVerifiedStartupProvider = Provider<bool>((ref) {
-  final profile = ref.watch(userProfileStreamProvider).value;
-  return profile?.role == UserRoles.startup && (profile?.isVerified ?? false);
-});
-
-final isStartupUserProvider = Provider<bool>((ref) {
-  final profile = ref.watch(userProfileStreamProvider).value;
-  return profile?.role == UserRoles.startup;
-});
+export 'package:venture_link/core/providers/user_context_providers.dart'
+    show currentStartupIdProvider, isStartupUserProvider, isVerifiedStartupProvider;
 
 final startupOpportunitiesStreamProvider =
     StreamProvider<OpportunitiesSnapshot>((ref) {
@@ -94,7 +79,7 @@ class CreateOpportunityNotifier extends AsyncNotifier<void> {
   Future<void> build() async {}
 
   Future<String?> submit(OpportunityInput input) async {
-    final profile = ref.read(userProfileStreamProvider).value;
+    final profile = ref.read(userProfileProvider);
     if (profile == null || profile.role != UserRoles.startup) {
       return StartupStrings.unauthorized;
     }
@@ -109,7 +94,7 @@ class CreateOpportunityNotifier extends AsyncNotifier<void> {
           );
     });
 
-    return _mapError(state);
+    return mapAsyncActionError(state);
   }
 }
 
@@ -137,7 +122,7 @@ class UpdateOpportunityNotifier extends FamilyAsyncNotifier<void, String> {
           );
     });
 
-    return _mapError(state);
+    return mapAsyncActionError(state);
   }
 }
 
@@ -164,18 +149,6 @@ class DeleteOpportunityNotifier extends FamilyAsyncNotifier<void, String> {
           );
     });
 
-    return _mapError(state);
+    return mapAsyncActionError(state);
   }
-}
-
-String? _mapError(AsyncValue<void> state) {
-  if (!state.hasError) {
-    return null;
-  }
-
-  final error = state.error!;
-  if (error is StateError) {
-    return error.message;
-  }
-  return FirebaseAuthExceptionMapper.mapGeneric(error);
 }

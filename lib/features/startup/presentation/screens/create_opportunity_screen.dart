@@ -6,7 +6,7 @@ import 'package:venture_link/core/constants/startup_strings.dart';
 import 'package:venture_link/features/startup/domain/entities/opportunity_input.dart';
 import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
 import 'package:venture_link/features/startup/presentation/widgets/opportunity_form.dart';
-import 'package:venture_link/shared/extensions/context_extensions.dart';
+import 'package:venture_link/shared/utils/action_result_handler.dart';
 
 class CreateOpportunityScreen extends ConsumerStatefulWidget {
   const CreateOpportunityScreen({super.key});
@@ -53,19 +53,12 @@ class _CreateOpportunityScreenState
   }
 
   Future<void> _submit(OpportunityInput input) async {
-    final error =
-        await ref.read(createOpportunityActionProvider.notifier).submit(input);
-
-    if (!mounted) {
-      return;
-    }
-
-    if (error != null) {
-      context.showSnackBar(error, isError: true);
-      return;
-    }
-
-    context.showSnackBar(StartupStrings.createSuccess);
-    context.pop();
+    await handleActionResult(
+      context,
+      action: () =>
+          ref.read(createOpportunityActionProvider.notifier).submit(input),
+      successMessage: StartupStrings.createSuccess,
+      onSuccess: () => context.pop(),
+    );
   }
 }

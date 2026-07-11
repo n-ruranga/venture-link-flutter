@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venture_link/features/opportunities/domain/entities/opportunity_category.dart';
 import 'package:venture_link/features/opportunities/domain/entities/opportunity_entity.dart';
+import 'package:venture_link/features/opportunities/domain/entities/opportunity_filter_scope.dart';
 import 'package:venture_link/features/opportunities/presentation/providers/opportunity_repository_providers.dart';
 import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
 
@@ -27,14 +28,16 @@ final opportunityCategoriesProvider =
   return OpportunityCategory.values;
 });
 
-final homeSearchQueryProvider = StateProvider<String>((ref) => '');
-
-final exploreSearchQueryProvider = StateProvider<String>((ref) => '');
+final searchQueryProvider =
+    StateProvider.family<String, OpportunityFilterScope>((ref, scope) => '');
 
 final selectedCategoryProvider =
-    StateProvider<OpportunityCategory?>((ref) => null);
+    StateProvider.family<OpportunityCategory?, OpportunityFilterScope>(
+  (ref, scope) => null,
+);
 
-final showBookmarksOnlyProvider = StateProvider<bool>((ref) => false);
+final showBookmarksOnlyProvider =
+    StateProvider.family<bool, OpportunityFilterScope>((ref, scope) => false);
 
 final opportunitiesListProvider = Provider<List<OpportunityEntity>>((ref) {
   final snapshot = ref.watch(opportunitiesStreamProvider);
@@ -62,28 +65,11 @@ final featuredOpportunitiesProvider = Provider<List<OpportunityEntity>>((ref) {
 });
 
 final filteredOpportunitiesProvider =
-    Provider<List<OpportunityEntity>>((ref) {
+    Provider.family<List<OpportunityEntity>, OpportunityFilterScope>((ref, scope) {
   final opportunities = ref.watch(opportunitiesListProvider);
-  final query = ref.watch(homeSearchQueryProvider).trim().toLowerCase();
-  final category = ref.watch(selectedCategoryProvider);
-  final bookmarksOnly = ref.watch(showBookmarksOnlyProvider);
-  final bookmarkedIds = ref.watch(bookmarkedIdsStreamProvider).value ?? {};
-
-  return _filterOpportunities(
-    opportunities: opportunities,
-    query: query,
-    category: category,
-    bookmarksOnly: bookmarksOnly,
-    bookmarkedIds: bookmarkedIds,
-  );
-});
-
-final exploreFilteredOpportunitiesProvider =
-    Provider<List<OpportunityEntity>>((ref) {
-  final opportunities = ref.watch(opportunitiesListProvider);
-  final query = ref.watch(exploreSearchQueryProvider).trim().toLowerCase();
-  final category = ref.watch(selectedCategoryProvider);
-  final bookmarksOnly = ref.watch(showBookmarksOnlyProvider);
+  final query = ref.watch(searchQueryProvider(scope)).trim().toLowerCase();
+  final category = ref.watch(selectedCategoryProvider(scope));
+  final bookmarksOnly = ref.watch(showBookmarksOnlyProvider(scope));
   final bookmarkedIds = ref.watch(bookmarkedIdsStreamProvider).value ?? {};
 
   return _filterOpportunities(
