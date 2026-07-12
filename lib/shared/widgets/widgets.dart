@@ -7,3 +7,4 @@ export 'loading_indicator.dart';
 export 'network_image_widget.dart';
 export 'primary_button.dart';
 export 'secondary_button.dart';
+export 'sign_out_button.dart';

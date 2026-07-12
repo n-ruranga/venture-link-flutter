@@ -19,6 +19,10 @@ abstract final class AuthStrings {
   static const String login = 'Sign In';
   static const String register = 'Create Account';
   static const String logout = 'Sign Out';
+  static const String logoutConfirmTitle = 'Sign out?';
+  static const String logoutConfirmMessage =
+      'You will need to sign in again to access your account.';
+  static const String cancel = 'Cancel';
   static const String forgotPassword = 'Forgot Password?';
   static const String noAccount = "Don't have an account?";
   static const String haveAccount = 'Already have an account?';

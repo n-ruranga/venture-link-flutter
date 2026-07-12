@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/spacing.dart';
 import 'package:venture_link/core/constants/startup_strings.dart';
-import 'package:venture_link/core/providers/user_context_providers.dart';
 import 'package:venture_link/core/routes/route_names.dart';
 import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
 import 'package:venture_link/features/startup/presentation/widgets/startup_opportunity_tile.dart';

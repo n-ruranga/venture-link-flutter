@@ -273,13 +273,6 @@ String? _redirect(Ref ref, GoRouterState state) {
     RouteNames.forgotPassword,
   };
 
-  const shellRoutes = {
-    RouteNames.home,
-    RouteNames.search,
-    RouteNames.applications,
-    RouteNames.profile,
-  };
-
   if (authState.isAuthenticated) {
     if (location.startsWith('/admin/')) {
       final profile = ref.read(userProfileStreamProvider).value;
@@ -306,14 +299,13 @@ String? _redirect(Ref ref, GoRouterState state) {
     return RouteNames.onboarding;
   }
 
-  if (hasCompletedOnboarding &&
-      !publicRoutes.contains(location) &&
-      location != RouteNames.emailVerification &&
-      !shellRoutes.contains(location) &&
-      !location.startsWith('/opportunities/') &&
-      !location.startsWith('/startup/') &&
-      !location.startsWith('/admin/') &&
-      location != RouteNames.editProfile) {
+  const authPublicRoutes = {
+    RouteNames.login,
+    RouteNames.register,
+    RouteNames.forgotPassword,
+  };
+
+  if (hasCompletedOnboarding && !authPublicRoutes.contains(location)) {
     return RouteNames.login;
   }
 

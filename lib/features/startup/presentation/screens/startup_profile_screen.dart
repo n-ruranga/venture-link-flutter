@@ -19,6 +19,7 @@ import 'package:venture_link/shared/widgets/empty_state_widget.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
 import 'package:venture_link/shared/widgets/primary_button.dart';
+import 'package:venture_link/shared/widgets/sign_out_button.dart';
 
 /// Startup-focused company profile — distinct from the student profile layout.
 class StartupProfileScreen extends ConsumerWidget {
@@ -264,6 +265,8 @@ class _StartupProfileBody extends StatelessWidget {
             icon: Icons.edit_outlined,
             onPressed: () => context.push(RouteNames.editProfile),
           ),
+          const SizedBox(height: AppSpacing.md),
+          const SignOutButton(),
         ],
       ),
     );

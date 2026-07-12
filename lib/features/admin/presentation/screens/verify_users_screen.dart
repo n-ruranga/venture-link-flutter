@@ -12,6 +12,7 @@ import 'package:venture_link/shared/widgets/app_card.dart';
 import 'package:venture_link/shared/widgets/empty_state_widget.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
+import 'package:venture_link/shared/widgets/sign_out_button.dart';
 
 class VerifyUsersScreen extends ConsumerWidget {
   const VerifyUsersScreen({super.key});
@@ -34,6 +35,7 @@ class VerifyUsersScreen extends ConsumerWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(AdminStrings.verifyUsers),
+        actions: const [SignOutIconButton()],
       ),
       body: usersAsync.when(
         loading: () => const LoadingIndicator(),

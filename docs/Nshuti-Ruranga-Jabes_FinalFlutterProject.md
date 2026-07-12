@@ -4,13 +4,12 @@
 
 ---
 
-**Author:** [Your Full Name]  
-**Student ID:** [Your Student ID]  
+**Author:** Nshuti Ruranga Jabes  
 **Course:** Mobile Application Development (Flutter)  
 **Institution:** African Leadership University (ALU)  
 **Assignment:** Formative Assignment 2 — Individual Final Flutter Project  
-**Submission Date:** [Date]  
-**GitHub Repository:** [Your Repository URL]  
+**Submission Date:** July 2026
+**GitHub Repository:** https://github.com/n-ruranga/venture-link-flutter.git  
 **Demo Video:** [Your Demo Video URL](https://your-demo-video-url-here)  
 
 ---
