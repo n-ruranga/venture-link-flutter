@@ -10,7 +10,7 @@
 **Assignment:** Formative Assignment 2 — Individual Final Flutter Project  
 **Submission Date:** July 2026
 **GitHub Repository:** https://github.com/n-ruranga/venture-link-flutter.git  
-**Demo Video:** [Your Demo Video URL](https://your-demo-video-url-here)  
+**Demo Video:** [Demo Video URL](https://drive.google.com/file/d/1EfWCt3gaic5IFIU4vbQ3SOKlwDgufSpn/view?usp=sharing)  
 
 ---
 
