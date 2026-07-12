@@ -2,7 +2,7 @@
 
 VentureLink is a Flutter mobile application that connects ALU students with internship and volunteer opportunities at student-led startups within the ALU ecosystem. Students can discover roles, apply, and track applications. Startups can post opportunities, manage listings, and review applicants. Admins verify startups before they can publish listings.
 
-**Technical Report:** [Nshuti-Ruranga-Jabes_FinalFlutterProject.pdf](docs/Nshuti-Ruranga-Jabes_FinalFlutterProject.pdf) · **Demo Video:** [Your Demo Video URL](https://your-demo-video-url-here)
+**Technical Report:** [Nshuti-Ruranga-Jabes_FinalFlutterProject.pdf](docs/Nshuti-Ruranga-Jabes_FinalFlutterProject.pdf) · **Demo Video:** [Demo Video URL](https://drive.google.com/file/d/1EfWCt3gaic5IFIU4vbQ3SOKlwDgufSpn/view?usp=sharing)
 
 ## Features
 
