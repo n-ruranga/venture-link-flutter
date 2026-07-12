@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/home_strings.dart';
-import 'package:venture_link/core/providers/user_context_providers.dart';
+import 'package:venture_link/shared/widgets/role_branch_screen.dart';
 
 class MainShell extends ConsumerWidget {
   const MainShell({
@@ -22,18 +22,40 @@ class MainShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isStartup = ref.watch(isStartupUserProvider);
+    final role = ref.watch(appShellRoleProvider);
 
-    if (isStartup) {
-      return Scaffold(
-        backgroundColor: AppColors.background,
-        body: navigationShell,
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: _onTap,
-          backgroundColor: AppColors.surface,
+    return switch (role) {
+      AppShellRole.admin => _buildShell(
+          navigationShell: navigationShell,
+          onTap: _onTap,
+          indicatorColor: AppColors.primary.withValues(alpha: 0.14),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.dashboard_outlined),
+              selectedIcon: Icon(Icons.dashboard_rounded),
+              label: HomeStrings.navDashboard,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.admin_panel_settings_outlined),
+              selectedIcon: Icon(Icons.admin_panel_settings_rounded),
+              label: HomeStrings.navUsers,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.explore_outlined),
+              selectedIcon: Icon(Icons.explore_rounded),
+              label: HomeStrings.navPlatform,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.manage_accounts_outlined),
+              selectedIcon: Icon(Icons.manage_accounts_rounded),
+              label: HomeStrings.navAccount,
+            ),
+          ],
+        ),
+      AppShellRole.startup => _buildShell(
+          navigationShell: navigationShell,
+          onTap: _onTap,
           indicatorColor: AppColors.accent.withValues(alpha: 0.16),
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.dashboard_outlined),
@@ -57,40 +79,52 @@ class MainShell extends ConsumerWidget {
             ),
           ],
         ),
-      );
-    }
+      AppShellRole.student => _buildShell(
+          navigationShell: navigationShell,
+          onTap: _onTap,
+          indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded),
+              label: HomeStrings.navHome,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.explore_outlined),
+              selectedIcon: Icon(Icons.explore_rounded),
+              label: HomeStrings.navExplore,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.description_outlined),
+              selectedIcon: Icon(Icons.description_rounded),
+              label: HomeStrings.navApplications,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline_rounded),
+              selectedIcon: Icon(Icons.person_rounded),
+              label: HomeStrings.navProfile,
+            ),
+          ],
+        ),
+    };
+  }
 
+  Widget _buildShell({
+    required StatefulNavigationShell navigationShell,
+    required ValueChanged<int> onTap,
+    required Color indicatorColor,
+    required List<NavigationDestination> destinations,
+  }) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onTap,
+        onDestinationSelected: onTap,
         backgroundColor: AppColors.surface,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+        indicatorColor: indicatorColor,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: HomeStrings.navHome,
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.explore_outlined),
-            selectedIcon: Icon(Icons.explore_rounded),
-            label: HomeStrings.navExplore,
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.description_outlined),
-            selectedIcon: Icon(Icons.description_rounded),
-            label: HomeStrings.navApplications,
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: HomeStrings.navProfile,
-          ),
-        ],
+        destinations: destinations,
       ),
     );
   }

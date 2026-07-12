@@ -23,4 +23,10 @@ abstract final class AdminStrings {
   static const String totalUsers = 'Total Users';
   static const String verifiedStartups = 'Verified Startups';
   static const String pendingStartups = 'Pending Startups';
+  static const String adminAccount = 'Admin Account';
+  static const String adminAccountSubtitle =
+      'Platform administrator for VentureLink';
+  static const String platformOverview = 'Platform Overview';
+  static const String platformOverviewSubtitle =
+      'Browse live opportunities on the platform';
 }

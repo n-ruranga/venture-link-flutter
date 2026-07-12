@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:venture_link/core/constants/admin_strings.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/spacing.dart';
 import 'package:venture_link/core/providers/user_context_providers.dart';
-import 'package:venture_link/core/routes/route_names.dart';
 import 'package:venture_link/features/admin/presentation/providers/admin_providers.dart';
 import 'package:venture_link/shared/widgets/app_card.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
 import 'package:venture_link/shared/widgets/loading_indicator.dart';
-import 'package:venture_link/shared/widgets/sign_out_button.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -32,7 +29,6 @@ class AdminDashboardScreen extends ConsumerWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(AdminStrings.dashboard),
-        actions: const [SignOutIconButton()],
       ),
       body: usersAsync.when(
         loading: () => const LoadingIndicator(),
@@ -83,44 +79,6 @@ class AdminDashboardScreen extends ConsumerWidget {
                 value: '${stats.pendingStartups}',
                 icon: Icons.pending_actions_outlined,
                 color: AppColors.accent,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              AppCard(
-                onTap: () => context.push(RouteNames.verifyStartups),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.sm),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.admin_panel_settings_outlined,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AdminStrings.verifyUsers,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            AdminStrings.verifyUsersSubtitle,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right_rounded),
-                  ],
-                ),
               ),
             ],
           );

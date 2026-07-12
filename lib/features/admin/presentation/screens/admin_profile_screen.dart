@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venture_link/core/constants/admin_strings.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/profile_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
-import 'package:venture_link/core/constants/startup_strings.dart';
 import 'package:venture_link/core/constants/strings.dart';
-import 'package:venture_link/core/providers/user_context_providers.dart';
+import 'package:venture_link/core/constants/user_roles.dart';
 import 'package:venture_link/core/routes/route_names.dart';
+import 'package:venture_link/features/admin/presentation/providers/admin_providers.dart';
 import 'package:venture_link/features/profile/domain/entities/user_profile_entity.dart';
 import 'package:venture_link/features/profile/presentation/providers/profile_providers.dart';
 import 'package:venture_link/features/profile/presentation/widgets/profile_widgets.dart';
-import 'package:venture_link/features/startup/domain/entities/startup_dashboard_stats.dart';
-import 'package:venture_link/features/startup/presentation/providers/startup_providers.dart';
 import 'package:venture_link/shared/widgets/app_card.dart';
 import 'package:venture_link/shared/widgets/empty_state_widget.dart';
 import 'package:venture_link/shared/widgets/error_state_widget.dart';
@@ -20,20 +19,19 @@ import 'package:venture_link/shared/widgets/loading_indicator.dart';
 import 'package:venture_link/shared/widgets/primary_button.dart';
 import 'package:venture_link/shared/widgets/sign_out_button.dart';
 
-/// Startup-focused company profile — distinct from the student profile layout.
-class StartupProfileScreen extends ConsumerWidget {
-  const StartupProfileScreen({super.key});
+/// Admin-focused account screen — distinct from student/startup profiles.
+class AdminProfileScreen extends ConsumerWidget {
+  const AdminProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileStreamProvider);
-    final stats = ref.watch(startupDashboardStatsProvider);
-    final isVerified = ref.watch(isVerifiedStartupProvider);
+    final stats = ref.watch(adminStatsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(StartupStrings.companyProfile),
+        title: const Text(AdminStrings.adminAccount),
         actions: [
           profileAsync.maybeWhen(
             data: (profile) => profile != null
@@ -57,33 +55,27 @@ class StartupProfileScreen extends ConsumerWidget {
         data: (profile) {
           if (profile == null) {
             return const EmptyStateWidget(
-              title: StartupStrings.companyProfile,
-              message: 'Company profile not found.',
-              icon: Icons.apartment_outlined,
+              title: AdminStrings.adminAccount,
+              message: 'Admin profile not found.',
+              icon: Icons.admin_panel_settings_outlined,
             );
           }
 
-          return _StartupProfileBody(
-            profile: profile,
-            stats: stats,
-            isVerified: isVerified,
-          );
+          return _AdminProfileBody(profile: profile, stats: stats);
         },
       ),
     );
   }
 }
 
-class _StartupProfileBody extends StatelessWidget {
-  const _StartupProfileBody({
+class _AdminProfileBody extends StatelessWidget {
+  const _AdminProfileBody({
     required this.profile,
     required this.stats,
-    required this.isVerified,
   });
 
   final UserProfileEntity profile;
-  final StartupDashboardStats stats;
-  final bool isVerified;
+  final AdminStats stats;
 
   @override
   Widget build(BuildContext context) {
@@ -97,8 +89,8 @@ class _StartupProfileBody extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.accent.withValues(alpha: 0.85),
-                  AppColors.secondary,
+                  AppColors.primary,
+                  AppColors.primary.withValues(alpha: 0.75),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -113,12 +105,10 @@ class _StartupProfileBody extends StatelessWidget {
                     CircleAvatar(
                       radius: 32,
                       backgroundColor: Colors.white.withValues(alpha: 0.2),
-                      child: Text(
-                        _initials(profile.fullName),
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
+                      child: const Icon(
+                        Icons.admin_panel_settings_rounded,
+                        color: Colors.white,
+                        size: 32,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
@@ -159,14 +149,20 @@ class _StartupProfileBody extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    isVerified
-                        ? 'Verified ALU Startup'
-                        : 'Pending ALU Verification',
+                    UserRoles.admin.toUpperCase(),
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
+                          letterSpacing: 0.6,
                         ),
                   ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  AdminStrings.adminAccountSubtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
                 ),
               ],
             ),
@@ -176,73 +172,31 @@ class _StartupProfileBody extends StatelessWidget {
             children: [
               Expanded(
                 child: _MetricCard(
-                  label: StartupStrings.activeOpportunities,
-                  value: '${stats.activeOpportunities}',
+                  label: AdminStrings.totalUsers,
+                  value: '${stats.totalUsers}',
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: _MetricCard(
-                  label: StartupStrings.totalApplicants,
-                  value: '${stats.totalApplicants}',
+                  label: AdminStrings.pendingStartups,
+                  value: '${stats.pendingStartups}',
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          if (!isVerified)
-            AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    StartupStrings.verificationRequired,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: AppColors.accent,
-                        ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    StartupStrings.notVerifiedHint,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          if (!isVerified) const SizedBox(height: AppSpacing.md),
           AppCard(
             child: ProfileInfoSection(
               title: ProfileStrings.about,
               child: Text(
-                profile.bio ?? StartupStrings.companyProfileSubtitle,
+                profile.bio ?? AdminStrings.dashboardSubtitle,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: profile.bio == null
                           ? AppColors.textSecondary
                           : AppColors.textPrimary,
                       height: 1.5,
                     ),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          AppCard(
-            child: ProfileInfoSection(
-              title: ProfileStrings.portfolioLinks,
-              child: Column(
-                children: [
-                  ProfileInfoRow(
-                    icon: Icons.language_rounded,
-                    label: ProfileStrings.portfolio,
-                    value: profile.portfolio ?? ProfileStrings.notSet,
-                  ),
-                  ProfileInfoRow(
-                    icon: Icons.link_rounded,
-                    label: ProfileStrings.linkedin,
-                    value: profile.linkedin ?? ProfileStrings.notSet,
-                  ),
-                ],
               ),
             ),
           ),
@@ -257,14 +211,6 @@ class _StartupProfileBody extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _initials(String name) {
-    final parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return '${parts.first[0]}${parts[1][0]}'.toUpperCase();
-    }
-    return name.isNotEmpty ? name[0].toUpperCase() : '?';
   }
 }
 
@@ -287,7 +233,7 @@ class _MetricCard extends StatelessWidget {
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.accent,
+                  color: AppColors.primary,
                 ),
           ),
           const SizedBox(height: 4),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:venture_link/core/constants/admin_strings.dart';
 import 'package:venture_link/core/constants/colors.dart';
 import 'package:venture_link/core/constants/profile_strings.dart';
 import 'package:venture_link/core/constants/spacing.dart';
@@ -26,7 +25,6 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileStreamProvider);
     final isStartup = ref.watch(isStartupUserProvider);
-    final isAdmin = ref.watch(isAdminUserProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -62,7 +60,6 @@ class ProfileScreen extends ConsumerWidget {
           return _ProfileContent(
             profile: profile,
             isStartup: isStartup,
-            isAdmin: isAdmin,
           );
         },
       ),
@@ -74,12 +71,10 @@ class _ProfileContent extends StatelessWidget {
   const _ProfileContent({
     required this.profile,
     required this.isStartup,
-    required this.isAdmin,
   });
 
   final UserProfileEntity profile;
   final bool isStartup;
-  final bool isAdmin;
 
   @override
   Widget build(BuildContext context) {
@@ -172,14 +167,6 @@ class _ProfileContent extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          if (isAdmin) ...[
-            PrimaryButton(
-              label: AdminStrings.dashboard,
-              icon: Icons.admin_panel_settings_outlined,
-              onPressed: () => context.push(RouteNames.adminDashboard),
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
           if (isStartup) ...[
             PrimaryButton(
               label: StartupStrings.dashboard,

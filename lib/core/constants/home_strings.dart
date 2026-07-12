@@ -22,6 +22,10 @@ abstract final class HomeStrings {
   static const String navListings = 'Listings';
   static const String navCompany = 'Company';
 
+  static const String navUsers = 'Users';
+  static const String navPlatform = 'Platform';
+  static const String navAccount = 'Account';
+
   static const String exploreComingSoon =
       'Explore and filters coming soon';
   static const String applicationsComingSoon =
